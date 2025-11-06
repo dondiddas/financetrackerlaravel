@@ -1,21 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hover + Toggle Sidebar </title>
-
-    <link rel="stylesheet" href="{{ asset('bootstrap-5.3.8-dist/css/bootstrap.min.css') }}">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="{{ asset('dist/css/adminlte.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
-    <link rel="stylesheet" href="{{ asset('plugins/fontawesome-free/css/all.min.css') }}">
-</head>
-
-<body class="bg-light">
-
-    @include('partials.sidebar')
+@extends('layout.app')
+@section('title', 'Dashboard')
+@section('content')
 
     <!-- Page Content -->
     {{-- <div id="page-content-wrapper">
@@ -226,14 +211,6 @@
 </div>
 </div> --}}
     <div id="page-content-wrapper" class="position-relative mt-3">
-        <div class="text center align-items-center">
-            @if (session('success'))
-                <div class="alert alert-success alert-dismissible fade show mt-2" role="alert">
-                    {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
-        </div>
         <div class="col">
             <h4 class="fw-semibold mb-0 pe-5">
                 {{ $greeting }}, {{ $userName }}!
@@ -286,8 +263,7 @@
                             <div class="text-center">
                                 <ul class="list-unstyled top-expenses-list text-start">
                                     @forelse ($upcomingbillsData as $bill)
-                                        <li
-                                            class="d-flex justify-content-between align-items-center border-bottom py-2">
+                                        <li class="d-flex justify-content-between align-items-center border-bottom py-2">
                                             <div class="text-start">
                                                 <div class="fw-semibold">{{ $bill->title }}</div>
                                                 <small class="text-muted">
@@ -324,7 +300,7 @@
                         <div class="card-body">
                             <div class="d-flex gap-2 mb-2 align-items-center">
                                 <i class="fas fa-chart-pie text-muted"></i>
-                                <h6 class="mb-0 fw-semibold text-dark">Money Spent</h6>
+                                <h6 class="mb-0 fw-semibold text-dark">Monthly Outflow</h6>
                             </div>
                             <div class="text-center">
                                 <h1 class="fw-bold mb-0">
@@ -358,67 +334,100 @@
                     <!-- Modal Daily Expenses-->
                     <div class="modal fade" id="dailyExpensesModal" tabindex="-1" aria-labelledby="dailyExpensesLabel"
                         aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-dialog modal-lg modal-dialog-centered">
                             <div class="modal-content">
 
                                 <div class="modal-header">
-                                    <h5 class="modal-title fw-semibold" id="dailyExpensesLabel">Daily Expenses Details
-                                    </h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                        aria-label="Close"></button>
+                                    <h5 class="modal-title fw-semibold">Daily Expenses Details</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                 </div>
+
                                 <div class="modal-body">
-                                    <p class="mb-1 text-secondary">Breakdown of your daily spending:</p>
-                                    <ul class="list-unstyled mt-2">
-                                        @forelse ($dailyExpensesBreakdown as $expense)
-                                            <li>
-                                                {{ $expense->category_name }}
-                                                @if (!empty($expense->note))
-                                                    — <small class="text-muted">{{ $expense->note }}</small>
-                                                @endif
-                                                <span
-                                                    class="float-end">₱{{ number_format($expense->amount, 2) }}</span>
-                                            </li>
-                                        @empty
-                                            <li class="text-muted">No expenses recorded today</li>
-                                        @endforelse
-                                    </ul>
+                                    <div class="row">
+                                        <!-- LEFT: Summary -->
+                                        <div class="col-md-6 border-end">
+                                            <p class="mb-1 text-secondary">Breakdown of your daily spending:</p>
 
-                                    <div class="mt-3 border-top pt-2">
-                                        <strong>Total Today:</strong> ₱{{ number_format($dailyExpensesData, 2) }}
+                                            <!-- Scrollable list wrapper -->
+                                            <div style="max-height: 220px; overflow-y: auto;">
+                                                <ul class="list-unstyled mt-2">
+                                                    @forelse ($dailyExpensesBreakdown->take(50) as $expense)
+                                                        <li class="mb-1">
+                                                            {{ $expense->category_name }}
+                                                            @if (!empty($expense->note))
+                                                                — <small class="text-muted">{{ $expense->note }}</small>
+                                                            @endif
+                                                            <span
+                                                                class="float-end">₱{{ number_format($expense->amount, 2) }}</span>
+                                                        </li>
+                                                    @empty
+                                                        <li class="text-muted">No expenses recorded today</li>
+                                                    @endforelse
+                                                </ul>
+                                            </div>
+
+                                            <div class="mt-3 border-top pt-2 mb-3 d-flex justify-content-between">
+                                                <strong>Total Today:</strong>
+                                                <strong>₱{{ number_format($dailyExpensesData, 2) }}</strong>
+                                            </div>
+
+
+                                        </div>
+                                        <!-- RIGHT: Form -->
+                                        <div class="col-md-6 ps-4 border">
+
+                                            @if (session('success'))
+                                                <div id="successAlert" class="alert alert-success py-2 small mb-2">
+                                                    {{ session('success') }}
+                                                </div>
+
+                                                <script>
+                                                    setTimeout(() => {
+                                                        const alert = document.getElementById('successAlert');
+                                                        if (alert) {
+                                                            alert.style.transition = "opacity 0.5s";
+                                                            alert.style.opacity = "0";
+                                                            setTimeout(() => alert.remove(), 1000);
+                                                        }
+                                                    }, 3000);
+                                                </script>
+                                            @endif
+
+                                            <h6 class="fw-semibold mb-2">Add New Expense</h6>
+
+                                            <form action="{{ route('expenses.addDaily') }}" method="POST">
+                                                @csrf
+
+                                                <div class="mb-2">
+                                                    <label class="form-label small text-muted">Category</label>
+                                                    <select name="category_id" class="form-select" required>
+                                                        <option value="">Select</option>
+                                                        @foreach ($categories as $category)
+                                                            <option value="{{ $category->id }}">{{ $category->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+
+                                                <div class="mb-2">
+                                                    <label class="form-label small text-muted">Amount</label>
+                                                    <input type="number" name="amount" class="form-control"
+                                                        step="0.01" min="0" required>
+                                                </div>
+
+                                                <div class="mb-2">
+                                                    <label class="form-label small text-muted">Note</label>
+                                                    <input type="text" name="note" class="form-control" required>
+                                                </div>
+
+                                                <button type="submit" class="btn btn-success w-100 mt-2">
+                                                    Add Expense
+                                                </button>
+                                            </form>
+                                        </div>
+
                                     </div>
-                                    {{-- Add New Daily Expense --}}
-                                    <form action="{{ route('expenses.addDaily') }}" method="POST" class="mt-4">
-                                        @csrf
-                                        <div class="mb-2">
-                                            <label for="category" class="form-label small text-muted">Category</label>
-                                            <select name="category_id" id="category" class="form-select" required>
-                                                <option value="">Select a category</option>
-                                                @foreach ($categories as $category)
-                                                    <option value="{{ $category->id }}">{{ $category->name }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-
-                                        <div class="mb-2">
-                                            <label for="amount" class="form-label small text-muted">Amount</label>
-                                            <input type="number" name="amount" id="amount" class="form-control"
-                                                step="0.01" min="0" required>
-                                        </div>
-
-                                        <div class="mb-2">
-                                            <label for="note" class="form-label small text-muted">Note</label>
-                                            <input type="text" name="note" id="note" class="form-control"
-                                                required>
-                                        </div>
-
-                                        <button type="submit" class="btn btn-success w-100">Add Expense</button>
-                                    </form>
-
                                 </div>
-
-
 
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary"
@@ -430,6 +439,7 @@
                     </div>
 
 
+
                     <div class="card border mb-3">
                         <div class="card-body">
                             <div class="d-flex gap-2 mb-2 align-items-center">
@@ -439,8 +449,7 @@
                             <div class="text-center">
                                 <ul class="list-unstyled top-expenses-list text-start">
                                     @forelse ($upcomingbillsData as $bill)
-                                        <li
-                                            class="d-flex justify-content-between align-items-center border-bottom py-2">
+                                        <li class="d-flex justify-content-between align-items-center border-bottom py-2">
                                             <div class="text-start">
                                                 <div class="fw-semibold">{{ $bill->title }}</div>
                                                 <small class="text-muted">
@@ -493,8 +502,7 @@
                                     style="position: relative; height: 300px;">
                                     <canvas id="revenue-chart-canvas" height="300"></canvas>
                                 </div>
-                                <div class="chart tab-pane" id="sales-chart"
-                                    style="position: relative; height: 300px;">
+                                <div class="chart tab-pane" id="sales-chart" style="position: relative; height: 300px;">
                                     <canvas id="sales-chart-canvas" height="300"></canvas>
                                 </div>
                             </div>
@@ -537,10 +545,14 @@
             </div>
         </div>
     </div>
+    @if (session('keep_modal_open'))
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                var myModal = new bootstrap.Modal(document.getElementById('dailyExpensesModal'));
+                myModal.show();
+            });
+        </script>
+    @endif
 
 
-    <!-- Bootstrap JS -->
-    <script src="{{ asset('bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js') }}"></script>
-</body>
-
-</html>
+@endsection

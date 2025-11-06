@@ -52,7 +52,11 @@ class ExpensesController extends Controller
         'transaction_date' => now(),
     ]);
 
-    return redirect()->back()->with('success', 'Expense added successfully!');
+    return redirect()->back()->with([
+    'success' => 'Expense added successfully!',
+    'keep_modal_open' => true
+]);
+
 }
 
 }

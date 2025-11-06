@@ -88,6 +88,13 @@
       color: #1e1f26;
     }
 
+    .sidebar-nav li.active a {
+    background: #444445;
+    color: #fff !important;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
     /* ---------- Hover: Desktop only ---------- */
     body.no-touch #sidebar-wrapper:hover {
       width: 250px;
