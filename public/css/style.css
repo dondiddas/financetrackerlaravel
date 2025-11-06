@@ -1,0 +1,131 @@
+
+    body {
+      overflow-x: hidden;
+      font-family: "Segoe UI", sans-serif;
+      background: #f8f9fa;
+    }
+
+    /* Sidebar base */
+    #sidebar-wrapper {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 60px; /* collapsed width */
+      background: #1e1f26;
+      color: #fff;
+      transition: all 0.3s ease;
+      z-index: 1000;
+      padding-top: 60px;
+      overflow: hidden;
+    }
+
+    /* Sidebar items */
+    .sidebar-nav {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .sidebar-nav li {
+      margin: 5px 0;
+    }
+
+    .sidebar-nav li a {
+      color: #ccc;
+      text-decoration: none;
+      padding: 12px 15px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      white-space: nowrap;
+      transition: background 0.2s ease;
+    }
+
+    .sidebar-nav li a:hover {
+      background: #343541;
+      color: #fff;
+      border-left: 4px solid #0d6efd;
+    }
+
+    .sidebar-nav i {
+      font-size: 18px;
+      min-width: 30px;
+      text-align: center;
+    }
+
+    /* Page content */
+    #page-content-wrapper {
+      margin-left: 70px;
+      transition: all 0.3s ease;
+      padding: 20px;
+    }
+
+    .navbar-brand {
+      color: #fff !important;
+      font-weight: 600;
+    }
+
+    /* Toggle button */
+    #menu-toggle {
+      background-color: #1e1f26;
+      border: none;
+      transition: background-color 0.3s, color 0.3s;
+      z-index: 2001;
+      display: none; /* hidden by default */
+    }
+
+    #menu-toggle i {
+      color: #fff;
+      transition: color 0.3s;
+    }
+
+    #menu-toggle.active {
+      background-color: #fff;
+    }
+
+    #menu-toggle.active i {
+      color: #1e1f26;
+    }
+
+    /* ---------- Hover: Desktop only ---------- */
+    body.no-touch #sidebar-wrapper:hover {
+      width: 250px;
+    }
+
+    body.no-touch #sidebar-wrapper:hover ~ #page-content-wrapper {
+      margin-left: 250px;
+    }
+
+    /* ---------- Responsive & touch ---------- */
+    @media (max-width: 1024px) {
+      #sidebar-wrapper {
+        width: 220px;
+        left: -220px; /* hidden by default */
+      }
+
+      #sidebar-wrapper.active {
+        left: 0; /* slide in */
+      }
+
+      #page-content-wrapper {
+        margin-left: 0 !important;
+      }
+
+      #sidebar-wrapper.active ~ #page-content-wrapper {
+        margin-left: 0;
+      }
+
+      #sidebar-wrapper:hover {
+        width: 220px; /* keep fixed for touch */
+      }
+    }
+
+    /* Force toggle visible for touch devices */
+    body.touch #menu-toggle {
+      display: inline-flex !important;
+    }
+
+    
+
+    
