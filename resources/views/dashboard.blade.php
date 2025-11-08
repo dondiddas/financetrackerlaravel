@@ -2,215 +2,9 @@
 @section('title', 'Dashboard')
 @section('content')
 
-    <!-- Page Content -->
-    {{-- <div id="page-content-wrapper">
-    <div class="row">
-<div class="col-lg-3 col-6">
-  <div class="card border-0 shadow-sm rounded-4 mt-4">
-    <div class="card-body text-center py-4">
-      <!-- Header -->
-      <div class="d-flex justify-content-center align-items-center gap-2 mb-2">
-        <i class="fas fa-piggy-bank text-secondary"></i>
-        <h6 class="mb-0 fw-semibold text-dark">Budget Health</h6>
-      </div>
 
-      <!-- Date -->
-      <p class="text-muted mb-2 small">{{ now()->format('F Y') }}</p>
+    <div class="position-relative ">
 
-      <!-- Main Value -->
-      <h1 class="fw-bold mb-0" style="font-size: 2.25rem;">
-        {{ number_format($AllowanceData, 2) }}
-      </h1>
-
-      <!-- Subtext -->
-      <p class="text-secondary mt-1 mb-0 small">
-        ₱{{ number_format($LastAllowanceData, 2) }}
-      </p>
-    </div>
-  </div>
-</div>
-
-            <!-- ./col -->
-            <div class="col-lg-3 col-6">
-  <div class="card border-0 shadow-sm rounded-4 mt-4">
-    <div class="card-body text-center py-4">
-      <div class="d-flex justify-content-center align-items-center gap-2 mb-2">
-        <i class="fas fa-money-bill-1 text-secondary"></i>
-        <h6 class="mb-0 fw-semibold text-dark">Allowance Overview</h6>
-      </div>
-
-      <p class="text-muted mb-2 small">{{ now()->format('F Y') }}</p>
-
-      <h1 class="fw-bold mb-0" style="font-size:2.25rem;">
-        {{ number_format($AllowanceData, 2) }}
-      </h1>
-
-      <p class="text-secondary mt-1 mb-0 small">
-        ₱{{ number_format($LastAllowanceData, 2) }}
-      </p>
-    </div>
-  </div>
-</div>
-
-            <!-- ./col -->
-            <div class="col-lg-3 col-6">
-  <div class="card border-0 shadow-sm rounded-4 mt-4">
-    <div class="card-body text-center py-4">
-      <div class="d-flex justify-content-center align-items-center gap-2 mb-2">
-        <i class="fas fa-chart-pie text-muted"></i>
-        <h6 class="mb-0 fw-semibold text-dark">Spending Rate</h6>
-      </div>
-
-      <p class="text-muted mb-2 small">{{ now()->format('F Y') }}</p>
-
-      <h1 class="{{ $rateColor }} fw-bold mb-0" style="font-size:2.25rem;">
-        {{ number_format($spendingRate, 2) }}%
-      </h1>
-      <p class="text-secondary mt-1 mb-0 small">
-        ₱{{ number_format($expensesData, 2) }} used
-      </p>
-    </div>
-  </div>
-</div>
-
-            <!-- ./col -->
-            <div class="col-lg-3 col-6">
-  <div class="card border-0 shadow-sm rounded-4 mt-4">
-    <div class="card-body text-center py-4">
-      <div class="d-flex justify-content-center align-items-center gap-2 mb-2">
-        <i class="fas fa-bars-progress text-secondary"></i>
-        <h6 class="mb-0 fw-semibold text-dark">Goal Progress</h6>
-      </div>
-
-      <p class="text-muted mb-2 small">{{ now()->format('F Y') }}</p>
-
-      <h1 class="fw-bold mb-0" style="font-size:2.25rem;">
-        {{ number_format($AllowanceData, 2) }}
-      </h1>
-
-      <p class="text-secondary mt-1 mb-0 small">
-        ₱{{ number_format($LastAllowanceData, 2) }}
-      </p>
-    </div>
-  </div>
-</div>
-
-                <div class="container-fluid mt-4">
-  <div class="row g-4 justify-content-center">
-
-    <!-- Chart Card -->
-    <div class="col-12 col-md-8">
-      <div class="card border-0 shadow-sm rounded-4">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <div class="d-flex align-items-center gap-2">
-              <i class="fas fa-chart-line text-secondary"></i>
-              <h6 class="fw-semibold mb-0 text-dark">Expenses Overview</h6>
-            </div>
-
-            <ul class="nav nav-pills">
-              <li class="nav-item">
-                <a class="nav-link active px-3 py-1" href="#revenue-chart" data-toggle="tab">Area</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link px-3 py-1" href="#sales-chart" data-toggle="tab">Donut</a>
-              </li>
-            </ul>
-          </div>
-
-          <div class="tab-content p-0">
-            <div class="chart tab-pane active" id="revenue-chart" style="position: relative; height: 300px;">
-              <canvas id="revenue-chart-canvas" height="300"></canvas>
-            </div>
-            <div class="chart tab-pane" id="sales-chart" style="position: relative; height: 300px;">
-              <canvas id="sales-chart-canvas" height="300"></canvas>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Top Expenses Card -->
-    <div class="col-12 col-md-4">
-      <div class="card border-0 shadow-sm rounded-4 h-100">
-        <div class="card-body">
-          <div class="d-flex align-items-center gap-2 mb-3">
-            <i class="fas fa-chart-pie text-secondary"></i>
-            <h6 class="fw-semibold mb-0 text-dark">Mini Chart</h6>
-          </div>
-
-          <div style="height: 300px;">
-            <canvas id="mini-chart-canvas" height="300"></canvas>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-    </div>
-
-<div class="row g-4 mt-2">
-  <!-- Upcoming Bills -->
-  <div class="col-lg-4 col-md-6">
-    <div class="card border-0 shadow-sm rounded-4 h-100">
-      <div class="card-body text-center py-4">
-        <div class="d-flex justify-content-center align-items-center gap-2 mb-2">
-          <i class="fas fa-file-invoice text-secondary"></i>
-          <h6 class="mb-0 fw-semibold text-dark">Upcoming Bills</h6>
-        </div>
-        <p class="text-muted mb-2 small">{{ now()->format('F Y') }}</p>
-        <h1 class="fw-bold mb-0" style="font-size: 2.25rem;">
-          {{ number_format($AllowanceData, 2) }}
-        </h1>
-        <p class="text-secondary mt-1 mb-0 small">
-          ₱{{ number_format($LastAllowanceData, 2) }}
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Recent Transactions -->
-  <div class="col-lg-4 col-md-6">
-    <div class="card border-0 shadow-sm rounded-4 h-100">
-      <div class="card-body text-center py-4">
-        <div class="d-flex justify-content-center align-items-center gap-2 mb-2">
-          <i class="fas fa-receipt text-secondary"></i>
-          <h6 class="mb-0 fw-semibold text-dark">Recent Transactions</h6>
-        </div>
-        <p class="text-muted mb-2 small">{{ now()->format('F Y') }}</p>
-        <h1 class="fw-bold mb-0" style="font-size: 2.25rem;">
-          {{ number_format($AllowanceData, 2) }}
-        </h1>
-        <p class="text-secondary mt-1 mb-0 small">
-          ₱{{ number_format($LastAllowanceData, 2) }}
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Top Expenses -->
-  <div class="col-lg-4 col-md-6">
-    <div class="card border-0 shadow-sm rounded-4 h-100">
-      <div class="card-body text-center py-4">
-        <div class="d-flex justify-content-center align-items-center gap-2 mb-2">
-          <i class="fas fa-chart-pie text-secondary"></i>
-          <h6 class="mb-0 fw-semibold text-dark">Top Expenses</h6>
-        </div>
-        <p class="text-muted mb-2 small">{{ now()->format('F Y') }}</p>
-        <h1 class="fw-bold mb-0" style="font-size: 2.25rem;">
-          {{ number_format($AllowanceData, 2) }}
-        </h1>
-        <p class="text-secondary mt-1 mb-0 small">
-          ₱{{ number_format($LastAllowanceData, 2) }}
-        </p>
-      </div>
-    </div>
-  </div>
-</div>
-</div> --}}
-    <div id="page-content-wrapper" class="position-relative mt-3">
         <div class="col">
             <h4 class="fw-semibold mb-0 pe-5">
                 {{ $greeting }}, {{ $userName }}!
@@ -222,18 +16,19 @@
                 <!-- Left Column: Allowance Overview + Spending Rate -->
                 <div class="col-lg-3 col-6 mb-3 d-flex flex-column">
                     <!-- Allowance Overview -->
-                    <div class="card border mb-3">
+                    <div class="card border mb-3" data-bs-toggle="modal" data-bs-target="#allowanceovermodal"
+                        style="cursor: pointer;">
                         <div class="card-body">
                             <div class="d-flex gap-2 mb-2 align-items-center">
                                 <i class="fas fa-piggy-bank text-muted"></i>
                                 <h6 class="mb-0 fw-semibold text-dark">Allowance Overview</h6>
                             </div>
                             <div class="text-center">
-                                <h1 class="fw-bold mb-0">
-                                    ₱{{ number_format($AllowanceData, 1) }}
+                                <h1 class="fw-semibold mb-0">
+                                    ₱{{ number_format($AllowanceData, 2) }}
                                 </h1>
                                 <p class="text-secondary mt-1 mb-0 small">
-                                    ₱{{ number_format($LastAllowanceData, 1) }} Previous Month
+                                    ₱{{ number_format($LastAllowanceData, 2) }} Previous Month
                                 </p>
                             </div>
                         </div>
@@ -246,7 +41,7 @@
                                 <h6 class="mb-0 fw-semibold text-dark">Cash Balance</h6>
                             </div>
                             <div class="text-center">
-                                <h1 class="fw-bold mb-0">
+                                <h1 class="fw-semibold mb-0">
                                     ₱{{ number_format($cashBalance, 1) }}
                                 </h1>
                                 <div class="my-4"></div>
@@ -292,6 +87,54 @@
                         </div>
                     </div>
                 </div>
+                {{-- Allowance Overview Modal --}}
+                <div class="modal fade" id="allowanceovermodal" tabindex="-1" aria-labelledby="allowanceovermodal"
+                    aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+
+                            <div class="modal-header">
+                                <h5 class="modal-title fw-semibold">Add Allowance</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+
+                            <div class="modal-body">
+                                @if (session('allowance_success'))
+                                    <div id="successAlert" class="alert alert-success py-2 small mb-2">
+                                        {{ session('allowance_success') }}
+                                    </div>
+
+                                    <script>
+                                        setTimeout(() => {
+                                            const alert = document.getElementById('successAlert');
+                                            if (alert) {
+                                                alert.style.transition = "opacity 0.5s";
+                                                alert.style.opacity = "0";
+                                                setTimeout(() => alert.remove(), 1000);
+                                            }
+                                        }, 3000);
+                                    </script>
+                                @endif
+                                <form action="{{ route('allowance.addallowance') }}" method="POST">
+                                    @csrf
+                                    <div class="mb-2">
+                                        <label class="form-label small">Amount</label>
+                                        <input type="number" name="amount" class="form-control" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-success w-100 mt-2">
+                                        Add Allowance
+                                    </button>
+                                </form>
+
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
 
 
                 <!-- MOney Spent/Daily Expenses -->
@@ -303,7 +146,7 @@
                                 <h6 class="mb-0 fw-semibold text-dark">Monthly Outflow</h6>
                             </div>
                             <div class="text-center">
-                                <h1 class="fw-bold mb-0">
+                                <h1 class="fw-semibold mb-0">
                                     ₱{{ number_format($expensesData, 2) }}
                                 </h1>
                                 <p class="{{ $rateColor }} text-secondary mt-1 mb-0 small">
@@ -322,7 +165,7 @@
                                 <h6 class="mb-0 fw-semibold text-dark">Daily Expenses</h6>
                             </div>
                             <div class="text-center">
-                                <h1 class="{{ $rateColor }} fw-bold mb-0">
+                                <h1 class="fw-semibold mb-0">
                                     {{ number_format($dailyExpensesData, 2) }}
                                 </h1>
                                 <p class="text-secondary mt-1 mb-0 small">
@@ -344,11 +187,11 @@
 
                                 <div class="modal-body">
                                     <div class="row">
-                                        <!-- LEFT: Summary -->
+                                        <!-- Expenses -->
                                         <div class="col-md-6 border-end">
                                             <p class="mb-1 text-secondary">Breakdown of your daily spending:</p>
 
-                                            <!-- Scrollable list wrapper -->
+                                            <!-- Scrollable -->
                                             <div style="max-height: 220px; overflow-y: auto;">
                                                 <ul class="list-unstyled mt-2">
                                                     @forelse ($dailyExpensesBreakdown->take(50) as $expense)
@@ -449,7 +292,8 @@
                             <div class="text-center">
                                 <ul class="list-unstyled top-expenses-list text-start">
                                     @forelse ($upcomingbillsData as $bill)
-                                        <li class="d-flex justify-content-between align-items-center border-bottom py-2">
+                                        <li class="d-flex justify-content-between align-items-center border-bottom py-2 top-expense-item"
+                                            data-bill-id="{{ $bill->id }}">
                                             <div class="text-start">
                                                 <div class="fw-semibold">{{ $bill->title }}</div>
                                                 <small class="text-muted">
@@ -468,6 +312,8 @@
 
                         </div>
                     </div>
+
+
                     <div class="card border">
                         <div class="card-body text-center">
                             <div class="d-flex gap-2 mb-2 align-items-center justify-content-center">
@@ -545,14 +391,15 @@
             </div>
         </div>
     </div>
-    @if (session('keep_modal_open'))
+    {{-- success notification for daily expenses and allowance Overview --}}
+    @if (session('open_modal'))
         <script>
             document.addEventListener("DOMContentLoaded", function() {
-                var myModal = new bootstrap.Modal(document.getElementById('dailyExpensesModal'));
+                var modalId = "{{ session('open_modal') }}";
+                var myModal = new bootstrap.Modal(document.getElementById(modalId));
                 myModal.show();
             });
         </script>
     @endif
-
 
 @endsection

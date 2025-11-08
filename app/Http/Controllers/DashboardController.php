@@ -88,7 +88,6 @@ class DashboardController extends Controller
 //  ]);
 
 
-// dd($dailyExpensesData);
 
 
         return view('dashboard', compact(

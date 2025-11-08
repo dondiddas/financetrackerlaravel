@@ -37,8 +37,8 @@ class ExpensesController extends Controller
         ->get();
 }
 
-    public function addDaily(Request $request) {
-    $request->validate([
+    public function addDaily(Request $add_expense) {
+    $add_expense->validate([
         'category_id' => 'required|exists:categories,id',
         'amount' => 'required|numeric|min:0.01',
         'note' => 'nullable|string|max:255',
@@ -46,17 +46,18 @@ class ExpensesController extends Controller
 
     Transaction::create([
         'userID' => auth()->id() ?? 1, // fallback for testing
-        'category_id' => $request->category_id,
-        'amount' => $request->amount,
-        'note' => $request->note,
+        'category_id' => $add_expense->category_id,
+        'amount' => $add_expense->amount,
+        'note' => $add_expense->note,
         'transaction_date' => now(),
     ]);
 
     return redirect()->back()->with([
     'success' => 'Expense added successfully!',
-    'keep_modal_open' => true
+    'open_modal' => 'dailyExpensesModal'
 ]);
 
 }
+
 
 }

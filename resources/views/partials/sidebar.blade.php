@@ -1,51 +1,189 @@
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hover + Toggle Sidebar (Fixed for All Devices)</title>
+<style>/* Default link styles */
+#sidebar a {
+    color: #fff;
+    text-decoration: none;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-radius: 8px;
+}
 
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+/* Icon default white */
+#sidebar a i {
+    color: #fff;
+    font-size: 1.15rem;
+}
 
-    <!-- Font Awesome 6 -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
-</head>
+/* Active link */
+#sidebar li.active {
+    background: #fff;
+    border-radius: 8px;
+}
+#sidebar li.active a,
+#sidebar li.active a i,
+#sidebar li.active .link-text {
+    color: #000 !important;
+    font-weight: 700;
+}
 
-<body>
-  <style></style>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg fixed-top">
-        <div class="container-fluid">
-            <button class="btn d-lg-none" id="menu-toggle">
-                <i class="fa-solid fa-bars"></i>
-            </button>
-        </div>
-    </nav>
+/* Hover */
+#sidebar a:hover {
+    background: rgba(255,255,255,0.18);
+}
 
-    <div id="wrapper">
-        <!-- Sidebar -->
-        <div id="sidebar-wrapper">
-            <ul class="sidebar-nav">
-                <li class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                <a href="{{ route('dashboard') }}"><i class="fa-solid fa-gauge"></i> Dashboard</a>
-            </li>
-                <li><a href="#"><i class="fa-solid fa-bolt"></i> Shortcut</a></li>
-                <li><a href="#"><i class="fa-solid fa-cloud-arrow-down"></i> Overview</a></li>
-                <li><a href="#"><i class="fa-solid fa-calendar"></i> Events</a></li>
-                <li><a href="#"><i class="fa-brands fa-youtube"></i> About</a></li>
-                <li><a href="#"><i class="fa-solid fa-wrench"></i> Services</a></li>
-                <li><a href="#"><i class="fa-solid fa-server"></i> Contact</a></li>
-            </ul>
-        </div>
-    </div>
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+/* Sidebar base */
+#sidebar {
+    width: 70px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    background: #111;
+    transition: width .3s ease;
+    z-index: 2000;
+    overflow-x: hidden;
+    padding-top: 70px;
+}
 
-    <!-- Touch detection + toggle -->
-    <script src="{{ asset('js/main.js') }}"></script>
-</body>
+/* Desktop expand on hover */
+@media (min-width: 768px) {
+    #sidebar:hover {
+        width: 240px;
+    }
 
-</html>
+    #page-content-wrapper {
+        margin-left: 70px;
+        transition: margin-left .3s ease;
+    }
+    #sidebar:hover ~ #page-content-wrapper {
+        margin-left: 240px;
+    }
+}
+
+/* Text hidden by default */
+#sidebar .link-text {
+    opacity: 0;
+    white-space: nowrap;
+    transition: opacity .3s ease;
+}
+
+/* Text shows when expanded (desktop hover) */
+@media (min-width: 768px) {
+    #sidebar:hover .link-text {
+        opacity: 1;
+    }
+}
+
+/* Mobile behavior */
+@media (max-width: 767px) {
+    #sidebar {
+        width: 180px;
+        transform: translateX(-100%);
+        transition: transform .3s ease-in-out;
+    }
+    #sidebar.active {
+        transform: translateX(0);
+    }
+
+    /* When mobile menu opens, always show text */
+    #sidebar.active .link-text {
+        opacity: 1 !important;
+    }
+
+    #page-content-wrapper {
+        margin-left: 0 !important;
+    }
+}
+/* Hide the desktop sidebar in mobile */
+@media (max-width: 767px) {
+    #sidebar {
+        display: none;
+    }
+}
+
+/* Bottom nav */
+.mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid rgba(255,255,255,0.2);
+    z-index: 3000;
+}
+
+/* Nav item */
+.mobile-nav .nav-item {
+    flex: 1;
+    text-align: center;
+    color: #dcdcdc;
+    font-size: 12px;
+    padding-top: 5px;
+}
+
+/* Icons */
+.mobile-nav .nav-item i{
+    font-size: 18px;
+    display: block;
+    margin-bottom: 3px;
+}
+
+/* Active item */
+.mobile-nav .nav-item.active,
+.mobile-nav .nav-item:hover {
+    color: #fff;
+    font-weight: 600;
+}
+
+
+
+</style>
+<div id="sidebar" class="bg-dark text-white">
+    <ul class="sidebar-nav list-unstyled m-0 p-0">
+        <li class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
+            <a href="{{ route('dashboard') }}" class="d-flex align-items-center gap-4 px-3 py-2">
+                <i class="fa-solid fa-gauge"></i> <span class="link-text">Dashboard</span>
+            </a>
+        </li>
+
+        <li><a href="#" class="d-flex align-items-center gap-4  py-2"><i class="fa-solid fa-bolt"></i> <span class="link-text">Shortcut</span></a></li>
+        <li><a href="#" class="d-flex align-items-center gap-4 py-2"><i class="fa-solid fa-cloud-arrow-down"></i> <span class="link-text">Overview</span></a></li>
+        <li><a href="#" class="d-flex align-items-center gap-4  py-2"><i class="fa-solid fa-calendar"></i> <span class="link-text">Events</span></a></li>
+        <li><a href="#" class="d-flex align-items-center gap-4  py-2"><i class="fa-brands fa-youtube"></i> <span class="link-text">About</span></a></li>
+        <li><a href="#" class="d-flex align-items-center gap-4  py-2"><i class="fa-solid fa-wrench"></i> <span class="link-text">Services</span></a></li>
+        <li><a href="#" class="d-flex align-items-center gap-4  py-2"><i class="fa-solid fa-server"></i> <span class="link-text">Contact</span></a></li>
+    </ul>
+</div>
+<!-- Mobile Bottom Navbar -->
+<nav id="mobileNav" class="mobile-nav bg-dark text-white d-md-none">
+    <a href="{{ route('dashboard') }}" class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+        <i class="fa-solid fa-gauge"></i>
+        <span>Dashboard</span>
+    </a>
+    
+    <a href="#" class="nav-item">
+        <i class="fa-solid fa-bolt"></i>
+        <span>Shortcut</span>
+    </a>
+
+    <a href="#" class="nav-item">
+        <i class="fa-solid fa-cloud-arrow-down"></i>
+        <span>Overview</span>
+    </a>
+
+    <a href="#" class="nav-item">
+        <i class="fa-solid fa-calendar"></i>
+        <span>Events</span>
+    </a>
+
+    <a href="#" class="nav-item">
+        <i class="fa-solid fa-server"></i>
+        <span>Contact</span>
+    </a>
+</nav>
+
