@@ -86,6 +86,8 @@ class DashboardController extends Controller
 //      'cashBalance' => $cashBalance,
 //     'spendingRate' => $spendingRate,
 //  ]);
+// dd($dailyExpensesBreakdown->toArray());
+
 
 
 

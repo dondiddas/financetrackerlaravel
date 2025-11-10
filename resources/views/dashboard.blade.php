@@ -217,7 +217,7 @@
                                                 <ul class="list-unstyled mt-2">
                                                     @forelse ($dailyExpensesBreakdown->take(50) as $expense)
                                                         <li class="mb-1">
-                                                            {{ $expense->category_name }}
+                                                            {{ $expense->category->name ?? 'No Category' }}
                                                             @if (!empty($expense->note))
                                                                 — <small class="text-muted">{{ $expense->note }}</small>
                                                             @endif
@@ -240,9 +240,9 @@
                                         <!-- RIGHT: Form -->
                                         <div class="col-md-6 ps-4 border">
 
-                                            @if (session('success'))
+                                            @if (session('expense_success'))
                                                 <div id="successAlert" class="alert alert-success py-2 small mb-2">
-                                                    {{ session('success') }}
+                                                    {{ session('expense_success') }}
                                                 </div>
 
                                                 <script>
@@ -264,13 +264,14 @@
 
                                                 <div class="mb-2">
                                                     <label class="form-label small text-muted">Category</label>
-                                                    <select name="category_id" class="form-select" required>
-                                                        <option value="">Select</option>
+                                                    <!-- User can type a new category or select existing -->
+                                                    <input list="categories" name="category_name" class="form-control"
+                                                        placeholder="Select or type a category" required>
+                                                    <datalist id="categories">
                                                         @foreach ($categories as $category)
-                                                            <option value="{{ $category->id }}">{{ $category->name }}
-                                                            </option>
+                                                            <option value="{{ $category->name }}">
                                                         @endforeach
-                                                    </select>
+                                                    </datalist>
                                                 </div>
 
                                                 <div class="mb-2">
@@ -288,6 +289,7 @@
                                                     Add Expense
                                                 </button>
                                             </form>
+
                                         </div>
 
                                     </div>

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\Transaction;
-
+use App\Models\Categories;
 use Illuminate\Http\Request;
 
 class ExpensesController extends Controller
@@ -42,27 +42,37 @@ public function getDailyExpenseBreakdown($userId)
 }
 
 
-    public function addDaily(Request $add_expense) {
-    $add_expense->validate([
-        'categoryID' => 'required|exists:categories,id',
-        'amount' => 'required|numeric|min:0.01',
-        'note' => 'nullable|string|max:255',
+    public function addDaily(Request $request)
+{
+    // Validate the input
+    $request->validate([
+        'category_name' => 'required|string|max:255',
+        'amount' => 'required|numeric|min:0',
+        'note' => 'required|string|max:255',
     ]);
 
+    // Check if category exists; if not, create it
+       $category = Categories::firstOrCreate(
+        ['name' => $request->category_name, 'user_id' => auth()->id() ?? 1],
+        ['type' => 'expense'] 
+    );
+
+    // Create the expense
     Transaction::create([
-        'userID' => auth()->id() ?? 1, // fallback for testing
-        'categoryID' => $add_expense->categoryID,
-        'amount' => $add_expense->amount,
-        'note' => $add_expense->note,
-        'transaction_date' => now(),
+        'category_id' => $category->id,
+        'amount' => $request->amount,
+        'note' => $request->note,
+        'user_id' => auth()->id() ?? 1, // if you have auth
     ]);
 
     return redirect()->back()->with([
-    'success' => 'Expense added successfully!',
-    'open_modal' => 'dailyExpensesModal'
+    'expense_success' => 'Expense added successfully!',
+    'open_modal' => 'dailyExpensesModal',
 ]);
 
 }
+
+
 
 
 }
