@@ -8,7 +8,7 @@ class UpcomingBillsController extends Controller
 {
     public function getUpcomingBills($userID)
     {
-        $getUpcomingBills = Bills::select('title', 'amount', 'due_date')
+        $getUpcomingBills = Bills::select('bill_name', 'amount', 'due_date')
             ->where('userID', $userID)
             ->whereDate('due_date', '>=', now())
             ->orderBy('due_date', 'asc')
@@ -27,7 +27,7 @@ class UpcomingBillsController extends Controller
     }
 
     return response()->json([
-        'title' => $bill->title,
+        'bill_name' => $bill->title,
         'amount' => $bill->amount,
         'due_date' => $bill->due_date->format('M d, Y'),
         'is_paid' => $bill->is_paid,

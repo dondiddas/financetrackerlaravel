@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 class ExpensesController extends Controller
 {
     public function getCurrentMonthExpenses($userID) {
-        $currentMonthExpenses = Transaction:: join('categories','transactions.category_id','=','categories.id')
+        $currentMonthExpenses = Transaction:: join('categories','transactions.categoryID','=','categories.id')
         ->where('categories.type','expense')
         ->where('transactions.userID', $userID)
         ->whereMonth('transactions.transaction_date', now()->month)
@@ -18,7 +18,7 @@ class ExpensesController extends Controller
     }
 
     public function getDailyExpenses($userID) {
-        $getdailyExpenses = Transaction::join('categories','transactions.category_id','=','categories.id')
+        $getdailyExpenses = Transaction::join('categories','transactions.categoryID','=','categories.id')
         ->where('categories.type','expense')
         ->where('transactions.userID', $userID)
         ->whereDate('transactions.transaction_date', now()->toDateString())
@@ -28,7 +28,7 @@ class ExpensesController extends Controller
 
     public function getDailyExpenseBreakdown($userID)
 {
-    return Transaction::join('categories', 'transactions.category_id', '=', 'categories.id')
+    return Transaction::join('categories', 'transactions.categoryID', '=', 'categories.id')
         ->where('categories.type', 'expense')
         ->where('transactions.userID', $userID)
         ->whereDate('transactions.transaction_date', today())
@@ -39,14 +39,14 @@ class ExpensesController extends Controller
 
     public function addDaily(Request $add_expense) {
     $add_expense->validate([
-        'category_id' => 'required|exists:categories,id',
+        'categoryID' => 'required|exists:categories,id',
         'amount' => 'required|numeric|min:0.01',
         'note' => 'nullable|string|max:255',
     ]);
 
     Transaction::create([
         'userID' => auth()->id() ?? 1, // fallback for testing
-        'category_id' => $add_expense->category_id,
+        'categoryID' => $add_expense->categoryID,
         'amount' => $add_expense->amount,
         'note' => $add_expense->note,
         'transaction_date' => now(),

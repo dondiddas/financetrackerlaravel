@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Bills extends Model
 {
      protected $table = 'bills'; // Correct property
-    protected $fillable = ['userID','title','amount','due_date','is_paid'];
+    protected $fillable = ['userID','bill_name','amount','due_date','is_paid'];
 
     protected $casts = [
         'due_date' => 'date',

@@ -7,17 +7,17 @@ use Illuminate\Http\Request;
 
 class AllowanceController extends Controller
 {
-    public function getAllowanceOverview($userID)
+    public function getAllowanceOverview($id)
     {
-        return Allowance::where('userID', $userID)
+        return Allowance::where('userID', $id)
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->sum('amount');
     }
 
-    public function getLastMonthAllowance($userID)
+    public function getLastMonthAllowance($id)
     {
-        return Allowance::where('userID', $userID)
+        return Allowance::where('userID', $id)
             ->whereMonth('created_at', now()->subMonth()->month)
             ->whereYear('created_at', now()->subMonth()->year)
             ->sum('amount');

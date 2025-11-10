@@ -28,11 +28,11 @@ class DashboardController extends Controller
 
     public function dashboard()
     {
-        $userID = 1;
+        $id = 1;
 
         // --- Get User Name ---
-        $user = User::where('userID', $userID)->first();
-        $userName = $user ? $user->name : 'there';
+        $user = User::where('id', $id)->first();
+        $userName = $user ? $user->first_name : 'there';
 
         // --- Timezone---
         date_default_timezone_set('Asia/Manila');
@@ -47,12 +47,12 @@ class DashboardController extends Controller
         }
 
         // --- Allowance + Expenses + Daily Expenses + Upcoming Bills---
-        $AllowanceData = $this->allowanceController->getAllowanceOverview($userID);
-        $LastAllowanceData = $this->allowanceController->getLastMonthAllowance($userID);
-        $expensesData = $this->expenseController->getCurrentMonthExpenses($userID);
-        $dailyExpensesData = $this->expenseController->getDailyExpenses($userID);
-        $upcomingbillsData = $this->upcomingbill->getUpcomingBills($userID);
-        $dailyExpensesBreakdown = $this->expenseController->getDailyExpenseBreakdown($userID);
+        $AllowanceData = $this->allowanceController->getAllowanceOverview($id);
+        $LastAllowanceData = $this->allowanceController->getLastMonthAllowance($id);
+        $expensesData = $this->expenseController->getCurrentMonthExpenses($id);
+        $dailyExpensesData = $this->expenseController->getDailyExpenses($id);
+        $upcomingbillsData = $this->upcomingbill->getUpcomingBills($id);
+        $dailyExpensesBreakdown = $this->expenseController->getDailyExpenseBreakdown($id);
 
 
         // --- Spending Rate ---
