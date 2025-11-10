@@ -94,11 +94,12 @@
                         <div class="modal-content">
 
                             <div class="modal-header">
-                                <h5 class="modal-title fw-semibold">Add Allowance</h5>
+                                <h5 class="modal-title fw-semibold">Add Income or Allowance</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
 
                             <div class="modal-body">
+                                {{-- Success Message --}}
                                 @if (session('allowance_success'))
                                     <div id="successAlert" class="alert alert-success py-2 small mb-2">
                                         {{ session('allowance_success') }}
@@ -115,17 +116,36 @@
                                         }, 3000);
                                     </script>
                                 @endif
+
+                                {{-- Add Allowance / Income Form --}}
                                 <form action="{{ route('allowance.addallowance') }}" method="POST">
                                     @csrf
-                                    <div class="mb-2">
+
+                                    <div class="mb-3">
                                         <label class="form-label small">Amount</label>
-                                        <input type="number" name="amount" class="form-control" required>
+                                        <input type="number" step="0.01" name="amount" class="form-control"
+                                            placeholder="Enter amount" required>
                                     </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label small">Type</label>
+                                        <select name="type" class="form-select" required>
+                                            <option value="">-- Select Type --</option>
+                                            <option value="income">Income</option>
+                                            <option value="allowance">Allowance</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label small">Note (optional)</label>
+                                        <input type="text" name="note" class="form-control"
+                                            placeholder="Enter note (optional)">
+                                    </div>
+
                                     <button type="submit" class="btn btn-success w-100 mt-2">
-                                        Add Allowance
+                                        Add Entry
                                     </button>
                                 </form>
-
                             </div>
 
                             <div class="modal-footer">
@@ -135,6 +155,7 @@
                         </div>
                     </div>
                 </div>
+
 
 
                 <!-- MOney Spent/Daily Expenses -->
@@ -295,7 +316,7 @@
                                         <li class="d-flex justify-content-between align-items-center border-bottom py-2 top-expense-item"
                                             data-bill-id="{{ $bill->id }}">
                                             <div class="text-start">
-                                                <div class="fw-semibold">{{ $bill->title }}</div>
+                                                <div class="fw-semibold">{{ $bill->bill_name }}</div>
                                                 <small class="text-muted">
                                                     Due: {{ \Carbon\Carbon::parse($bill->due_date)->format('M d, Y') }}
                                                 </small>

@@ -6,10 +6,10 @@ use Illuminate\Http\Request;
 
 class UpcomingBillsController extends Controller
 {
-    public function getUpcomingBills($userID)
+    public function getUpcomingBills($userid)
     {
         $getUpcomingBills = Bills::select('bill_name', 'amount', 'due_date')
-            ->where('userID', $userID)
+            ->where('user_id', $userid)
             ->whereDate('due_date', '>=', now())
             ->orderBy('due_date', 'asc')
             ->get();

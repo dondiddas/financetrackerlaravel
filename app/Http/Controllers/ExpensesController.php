@@ -7,35 +7,40 @@ use Illuminate\Http\Request;
 
 class ExpensesController extends Controller
 {
-    public function getCurrentMonthExpenses($userID) {
-        $currentMonthExpenses = Transaction:: join('categories','transactions.categoryID','=','categories.id')
-        ->where('categories.type','expense')
-        ->where('transactions.userID', $userID)
-        ->whereMonth('transactions.transaction_date', now()->month)
-        ->whereYear('transactions.transaction_date', now()->year)
-        ->sum('transactions.amount');
-        return $currentMonthExpenses;
-    }
-
-    public function getDailyExpenses($userID) {
-        $getdailyExpenses = Transaction::join('categories','transactions.categoryID','=','categories.id')
-        ->where('categories.type','expense')
-        ->where('transactions.userID', $userID)
-        ->whereDate('transactions.transaction_date', now()->toDateString())
+    public function getCurrentMonthExpenses($userid) {
+        return Transaction::where('user_id',$userid)
+        ->whereHas('category', function($query){
+                $query->where('type','expense');
+        })
+        ->whereMonth('transaction_date', now()->month)
+        ->whereYear('transaction_date', now()->year)
         ->sum('amount');
-        return $getdailyExpenses;
     }
 
-    public function getDailyExpenseBreakdown($userID)
+    public function getDailyExpenses($userid) {
+        $today = now();
+        return Transaction::where('user_id', $userid)
+        ->whereHas('category',function($query) {
+            $query->where('type','expense');
+        })
+        ->whereYear('transaction_date', $today->year)
+        ->whereMonth('transaction_date',$today->month)
+        ->whereDay('transaction_date', $today->day)
+        ->sum('amount');
+    }
+
+public function getDailyExpenseBreakdown($userId)
 {
-    return Transaction::join('categories', 'transactions.categoryID', '=', 'categories.id')
-        ->where('categories.type', 'expense')
-        ->where('transactions.userID', $userID)
-        ->whereDate('transactions.transaction_date', today())
-        ->select('categories.name as category_name', 'transactions.amount', 'transactions.note')
-        ->orderBy('transactions.amount', 'desc')
+    return Transaction::where('user_id', $userId)
+        ->whereHas('category', function ($query) {
+            $query->where('type', 'expense');
+        })
+        ->whereDate('transaction_date', now()->toDateString())
+        ->with('category:id,name')
+        ->orderBy('amount', 'desc')
         ->get();
 }
+
 
     public function addDaily(Request $add_expense) {
     $add_expense->validate([

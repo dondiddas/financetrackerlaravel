@@ -19,13 +19,6 @@ class UserTableSeeder extends Seeder
             'last_name' => 'Gonzales',
             'email' => 'princerandygonzales@example.com',
             'password' => bcrypt('password'),
-        ],
-        [
-            'first_name' => 'John',
-            'middle_name' => null,
-            'last_name' => 'Doe',
-            'email' => 'johndoe@example.com',
-            'password' => bcrypt('password'),
         ]);
     }
 }

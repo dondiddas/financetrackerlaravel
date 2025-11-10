@@ -11,15 +11,20 @@ class CategoriesTableSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
+   public function run()
     {
-        Categories::insert([
-            ['userID' => 1, 'name' => 'Food', 'type' => 'expense'],
-            ['userID' => 1, 'name' => 'Transportation', 'type' => 'expense'],
-            ['userID' => 1, 'name' => 'Utilities', 'type' => 'expense'],
-            ['userID' => 1, 'name' => 'Entertainment', 'type' => 'expense'],
-            ['userID' => 1, 'name' => 'Salary', 'type' => 'income'],
-            ['userID' => 1, 'name' => 'Freelance', 'type' => 'income'],
-        ]);
+        $categories = [
+            ['user_id' => 1, 'name' => 'Pocket Money', 'type' => 'allowance'],
+            ['user_id' => 1, 'name' => 'Salary', 'type' => 'income'],
+            ['user_id' => 1, 'name' => 'Groceries', 'type' => 'expense'],
+            ['user_id' => 1, 'name' => 'Electricity Bill', 'type' => 'expense'],
+        ];
+
+        foreach ($categories as $category) {
+            Categories::updateOrCreate(
+                ['user_id' => $category['user_id'], 'name' => $category['name']],
+                $category
+            );
+        }
     }
 }

@@ -14,11 +14,10 @@ return new class extends Migration
         Schema::create('reminders', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->unsignedBigInteger('userID');
             $table->string('title');
             $table->string('note')->nullable();
             $table->date('reminder_date');
-            $table->foreign('userID')->references('id')->on('users')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
         });
     }
 
