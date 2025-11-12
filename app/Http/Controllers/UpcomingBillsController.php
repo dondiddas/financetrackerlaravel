@@ -27,7 +27,7 @@ class UpcomingBillsController extends Controller
     }
 
     return response()->json([
-        'bill_name' => $bill->title,
+        'bill_name' => $bill->bill_name,
         'amount' => $bill->amount,
         'due_date' => $bill->due_date->format('M d, Y'),
         'is_paid' => $bill->is_paid,

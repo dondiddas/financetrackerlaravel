@@ -306,7 +306,8 @@
 
 
 
-                    <div class="card border mb-3">
+                    {{-- Upcoming Bills --}}
+                    <div class="card border">
                         <div class="card-body">
                             <div class="d-flex gap-2 mb-2 align-items-center">
                                 <i class="fas fa-money-bills text-muted"></i>
@@ -315,28 +316,57 @@
                             <div class="text-center">
                                 <ul class="list-unstyled top-expenses-list text-start">
                                     @forelse ($upcomingbillsData as $bill)
-                                        <li class="d-flex justify-content-between align-items-center border-bottom py-2 top-expense-item"
-                                            data-bill-id="{{ $bill->id }}">
-                                            <div class="text-start">
+                                        <!-- Entire row is clickable -->
+                                        <li class="d-flex justify-content-between align-items-center border-bottom py-2 px-2 clickable"
+                                            data-bs-toggle="modal" data-bs-target="#billModal{{ $bill->id }}"
+                                            style="cursor: pointer;">
+                                            <div class="text-start flex-grow-1">
                                                 <div class="fw-semibold">{{ $bill->bill_name }}</div>
                                                 <small class="text-muted">
                                                     Due: {{ \Carbon\Carbon::parse($bill->due_date)->format('M d, Y') }}
                                                 </small>
                                             </div>
-                                            <div class="fw-semibold text-end">
+                                            <div class="fw-semibold text-end me-2">
                                                 ₱{{ number_format($bill->amount, 2) }}
                                             </div>
+                                            <i class="fas fa-eye text-muted"></i>
                                         </li>
                                     @empty
                                         <li class="text-muted py-2">No upcoming bills</li>
                                     @endforelse
                                 </ul>
                             </div>
-
                         </div>
                     </div>
-
-
+                    <!-- Bill Modal -->
+                    <div class="modal fade" id="billModal{{ $bill->id }}" tabindex="-1"
+                        aria-labelledby="billModalLabel{{ $bill->id }}" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title fw-semibold" id="billModalLabel{{ $bill->id }}">
+                                        {{ $bill->bill_name }}
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p><strong>Title:</strong> {{ $bill->bill_name }}</p>
+                                    <p><strong>Amount:</strong> ₱{{ number_format($bill->amount, 2) }}
+                                    </p>
+                                    <p><strong>Due Date:</strong>
+                                        {{ \Carbon\Carbon::parse($bill->due_date)->format('F j, Y') }}
+                                    </p>
+                                    <p><strong>Description:</strong>
+                                        {{ $bill->description ?? 'No description provided.' }}</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="card border">
                         <div class="card-body text-center">
                             <div class="d-flex gap-2 mb-2 align-items-center justify-content-center">
@@ -367,8 +397,9 @@
                         </div>
                         <div class="card-body">
                             <div class="chart">
-                  <canvas id="areaChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-                </div>
+                                <canvas id="areaChart"
+                                    style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                            </div>
                         </div>
                     </div>
                     <div class="row">
