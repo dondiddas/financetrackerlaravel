@@ -398,7 +398,7 @@
                         <div class="card-body">
                             <div class="chart">
                                 <canvas id="areaChart"
-                                    style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                                    style="min-height: 330px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
                             </div>
                         </div>
                     </div>
