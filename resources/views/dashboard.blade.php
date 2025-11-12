@@ -366,15 +366,9 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            <div class="tab-content p-0">
-                                <div class="chart tab-pane active" id="revenue-chart"
-                                    style="position: relative; height: 300px;">
-                                    <canvas id="revenue-chart-canvas" height="300"></canvas>
-                                </div>
-                                <div class="chart tab-pane" id="sales-chart" style="position: relative; height: 300px;">
-                                    <canvas id="sales-chart-canvas" height="300"></canvas>
-                                </div>
-                            </div>
+                            <div class="chart">
+                  <canvas id="areaChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                </div>
                         </div>
                     </div>
                     <div class="row">
