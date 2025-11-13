@@ -8,7 +8,7 @@ class UpcomingBillsController extends Controller
 {
     public function getUpcomingBills($userid)
     {
-        $getUpcomingBills = Bills::select('bill_name', 'amount', 'due_date')
+        $getUpcomingBills = Bills::select('id','bill_name', 'amount', 'due_date','description')
             ->where('user_id', $userid)
             ->whereDate('due_date', '>=', now())
             ->orderBy('due_date', 'asc')
@@ -33,6 +33,16 @@ class UpcomingBillsController extends Controller
         'is_paid' => $bill->is_paid,
     ]);
 }
+
+    public function updateDescription(Request $request, $id)
+{
+    $bill = Bills::findOrFail($id);
+    $bill->description = $request->description;
+    $bill->save();
+
+    return redirect()->back()->with('success', 'Description updated successfully!');
+}
+
 
 }
 

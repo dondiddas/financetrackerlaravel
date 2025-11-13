@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Carbon\Carbon;
 use App\Models\Transaction;
 use App\Models\Categories;
 use Illuminate\Http\Request;
@@ -72,13 +73,15 @@ public function getDailyExpenseBreakdown($userId)
 
 }
 
+
+
+
     public function getWeeklyChart($userId) {
-        $daysInweek = 7;
         $labels = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
         $dailyExpenses = [];
 
-        $startOfWeek = now()->startOfWeek();
-        $endOfWeek = now()->endOfWeek();
+        $startOfWeek = now()->startOfWeek(0);
+        $endOfWeek = now()->endOfWeek(6);
 
         foreach($labels as $index => $label) {
             $date = $startOfWeek->copy()->addDays($index);
@@ -97,10 +100,27 @@ public function getDailyExpenseBreakdown($userId)
         ];
     }
 
-    public function getMonthlyChart($userId) {
-        
+public function getMonthlyChart($userId) {
+    $labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    $monthlyExpenses = [];
+
+    foreach ($labels as $index => $label) {
+        $monthStart = Carbon::create(null, $index + 1, 1)->startOfMonth();
+        $monthEnd = $monthStart->copy()->endOfMonth();
+
+        $monthlyAmount = Transaction::where('user_id', $userId)
+            ->whereHas('category', fn($q) => $q->where('type','expense'))
+            ->whereBetween('transaction_date', [$monthStart, $monthEnd])
+            ->sum('amount');
+
+        $monthlyExpenses[] = $monthlyAmount;
     }
 
+    return [
+        'labels' => $labels,
+        'data' => $monthlyExpenses
+    ];
+}
 
 
 

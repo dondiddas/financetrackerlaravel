@@ -189,12 +189,52 @@
                                 <h1 class="fw-semibold mb-0">
                                     {{ number_format($dailyExpensesData, 2) }}
                                 </h1>
-                                <p class="text-secondary mt-1 mb-0 small">
-                                    ₱{{ number_format($expensesData, 2) }} used
+                                <p class="text-secondary mt-1 mb-0 small border" data-bs-toggle="modal"
+                                    data-bs-target="#dailyLimitModal" style="cursor: pointer;"
+                                    onclick="event.stopPropagation()">
+                                    ₱{{ number_format($DailyLimit, 2) }} Limit Expense
                                 </p>
                             </div>
                         </div>
                     </div>
+
+                    {{-- Daily Limit Expense Modal --}}
+                    <div class="modal fade" id="dailyLimitModal" tabindex="-1" aria-labelledby="dailyLimitLabel"
+                        aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-0 shadow-lg">
+                                <div class="modal-header">
+                                    <h5 class="modal-title fw-semibold" id="dailyLimitLabel">
+                                        Add Daily Expense Limit
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+
+                                <div class="modal-body">
+                                    <form action="{{ route('expenses.addDailyLimit') }}" method="POST">
+                                        @csrf
+
+                                        <!-- Expense Limit Amount -->
+                                        <div class="mb-3">
+                                            <label for="amount" class="form-label fw-semibold">Daily Limit (₱)</label>
+                                            <input type="number" name="amount" id="amount" class="form-control"
+                                                placeholder="Enter limit amount" min="0" step="0.01">
+                                        </div>
+
+                                        <!-- Submit Button -->
+                                        <div class="text-end">
+                                            <button type="submit" class="btn btn-success fw-semibold">
+                                                Save Limit
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
                     <!-- Modal Daily Expenses-->
                     <div class="modal fade" id="dailyExpensesModal" tabindex="-1" aria-labelledby="dailyExpensesLabel"
                         aria-hidden="true">
@@ -339,34 +379,70 @@
                         </div>
                     </div>
                     <!-- Bill Modal -->
-                    <div class="modal fade" id="billModal{{ $bill->id }}" tabindex="-1"
-                        aria-labelledby="billModalLabel{{ $bill->id }}" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title fw-semibold" id="billModalLabel{{ $bill->id }}">
-                                        {{ $bill->bill_name }}
-                                    </h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                        aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <p><strong>Title:</strong> {{ $bill->bill_name }}</p>
-                                    <p><strong>Amount:</strong> ₱{{ number_format($bill->amount, 2) }}
-                                    </p>
-                                    <p><strong>Due Date:</strong>
-                                        {{ \Carbon\Carbon::parse($bill->due_date)->format('F j, Y') }}
-                                    </p>
-                                    <p><strong>Description:</strong>
-                                        {{ $bill->description ?? 'No description provided.' }}</p>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary"
-                                        data-bs-dismiss="modal">Close</button>
+                    @foreach ($upcomingbillsData as $bill)
+                        <div class="modal fade" id="billModal{{ $bill->id }}" tabindex="-1"
+                            aria-labelledby="billModalLabel{{ $bill->id }}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title fw-semibold" id="billModalLabel{{ $bill->id }}">
+                                            {{ $bill->bill_name }}
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <!-- Modal Body -->
+                                    <div class="modal-body">
+                                        <div class="row mb-3 justify-content-center text-center">
+                                            <div class="col">
+                                                <p class="mb-1"><strong>Amount:</strong></p>
+                                                <p>₱{{ number_format($bill->amount, 2) }}</p>
+                                            </div>
+                                            <div class="col">
+                                                <p class="mb-1"><strong>Due Date:</strong></p>
+                                                <p>{{ \Carbon\Carbon::parse($bill->due_date)->format('F j, Y') }}</p>
+                                            </div>
+                                        </div>
+                                            <!-- Description Form -->
+                                            <form action="{{ route('bills.updateDescription', $bill->id) }}"
+                                                method="POST">
+                                                @csrf
+                                                @method('PUT')
+                                                <div class="mb-3">
+                                                    <label for="description{{ $bill->id }}"
+                                                        class="form-label fw-semibold">Description</label>
+                                                    <textarea class="form-control" id="description{{ $bill->id }}" name="description" rows="3"
+                                                        placeholder="Add or update description...">{{ $bill->description }}</textarea>
+                                                </div>
+                                                <div class="d-flex justify-content-end mb-2">
+                                                    <button type="submit" class="btn btn-primary fw-semibold">Save
+                                                        Description</button>
+                                                </div>
+                                            </form>
+                                        </div>
+
+                                        <div class="modal-footer">
+                                            <div class="d-flex gap-2 justify-content-end">
+                                                <form {{-- action="{{ route('', $bill->id) }}" --}} method="POST">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-success fw-semibold">
+                                                        Mark as Paid
+                                                    </button>
+                                                </form>
+
+                                                <form {{-- action="{{ route('', $bill->id) }}" --}} method="POST">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-outline-success fw-semibold">
+                                                        Downpayment
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
+                    @endforeach
+
                     <div class="card border">
                         <div class="card-body text-center">
                             <div class="d-flex gap-2 mb-2 align-items-center justify-content-center">
@@ -376,10 +452,22 @@
                         </div>
                     </div>
                 </div>
+
                 <script>
                     window.chartData = {
-                        labels: @json($chartDisplay['labels']),
-                        daily: @json($chartDisplay['data']),
+                        week: {
+                            labels: @json($chartDisplay['labels']),
+                            data: @json($chartDisplay['data'])
+                        },
+                        month: {
+                            labels: @json($monthlyChart['labels']),
+                            data: @json($monthlyChart['data'])
+                        }
+                    };
+
+                    window.limitData = {
+                        week: @json($weeklyLimitChart),
+                        month: @json($MonthlyLimitChart)
                     };
                 </script>
 
@@ -387,8 +475,8 @@
                     <!-- Chart Card -->
                     <div class="card ">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h3 class="card-title">
-                                <i class="fas fa-chart-line mr-1"></i> Expenses Breakdown
+                            <h3 class="card-title mb-0 fw-semibold text-dark">
+                                <i class="fas fa-chart-line mr-1 mb-0 fw-semibold text-dark"></i> Expenses Breakdown
                             </h3>
 
                             <!-- Nav items on the right -->
@@ -398,9 +486,6 @@
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="#" data-period="month">Month</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="#" data-period="year">Annual</a>
                                 </li>
                             </ul>
                         </div>

@@ -9,7 +9,9 @@ class Categories extends Model
     protected $fillable = [
         'name',
         'type',
-        'user_id', // add this so you can mass assign user_id
+        'user_id', 
+        'expense_limit',
+        'limit_date'
     ];
 
     public function transactions()

@@ -2,18 +2,14 @@ $(document).ready(function () {
   var ctx = $('#barChart').get(0).getContext('2d');
 
   // --- Chart datasets (replace with real data from PHP later) ---
-  var chartDatasets = {
+var chartDatasets = {
     week: {
-      labels: window.chartData.labels,
-      data: window.chartData.daily
+        labels: window.chartData.week.labels,
+        data: window.chartData.week.data
     },
     month: {
-      labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-      data: [450, 380, 500, 620] // sample data
-    },
-    year: {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-      data: [1200, 980, 1400, 1100, 1250, 1500] // sample data
+        labels: window.chartData.month.labels,
+        data: window.chartData.month.data
     }
   };
 
@@ -28,8 +24,19 @@ $(document).ready(function () {
       hoverBackgroundColor: 'rgba(60,141,188,1)',
       hoverBorderColor: 'rgba(60,141,188,1)',
       data: chartDatasets.week.data
-    }]
+    },{
+          label               : 'Limit Expenses',
+          backgroundColor     : 'rgba(210, 214, 222, 1)',
+          borderColor         : 'rgba(210, 214, 222, 1)',
+          borderWidth: 1,
+          pointColor          : 'rgba(210, 214, 222, 1)',
+          pointStrokeColor    : '#c1c7d1',
+          pointHighlightFill  : '#fff',
+          pointHighlightStroke: 'rgba(220,220,220,1)',
+          data: window.limitData.week
+        },]
   };
+  
 
   var barChartOptions = {
     responsive: true,
@@ -63,6 +70,11 @@ $(document).ready(function () {
       }
     }
   };
+  var lineChartOptions = $.extend(true, {}, barChartOptions)
+    var lineChartData = $.extend(true, {}, barChartData)
+    lineChartData.datasets[0].fill = false;
+    lineChartData.datasets[1].fill = false;
+    lineChartOptions.datasetFill = false
 
   // --- Initialize chart ---
   var barChart = new Chart(ctx, {
@@ -81,12 +93,28 @@ $(document).ready(function () {
     var period = $(this).data('period');
     var dataset = chartDatasets[period];
 
-    // Update chart
-    barChart.data.labels = dataset.labels;
-    barChart.data.datasets[0].data = dataset.data;
-    barChart.data.datasets[0].label =
-      period.charAt(0).toUpperCase() + period.slice(1) + ' Expenses';
+    /// Update chart function
+barChart.data.labels = dataset.labels;
+barChart.data.datasets[0].data = dataset.data;
+barChart.data.datasets[0].label = period.charAt(0).toUpperCase() + period.slice(1) + ' Expenses';
 
-    barChart.update();
+// Update limit dataset (second dataset)
+if (barChart.data.datasets[1]) {
+    barChart.data.datasets[1].data = window.limitData[period];
+} else {
+    // If limit dataset doesn't exist yet, add it
+    barChart.data.datasets.push({
+        label: period.charAt(0).toUpperCase() + period.slice(1) + ' Limit',
+        data: window.limitData[period],
+        type: 'line', // show as line
+        borderColor: 'rgba(255, 99, 132, 0.8)',
+        borderWidth: 2,
+        fill: false,
+        pointRadius: 3
+    });
+}
+
+barChart.update();
+
   });
 });
