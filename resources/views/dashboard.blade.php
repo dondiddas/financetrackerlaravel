@@ -380,32 +380,31 @@
                     window.chartData = {
                         labels: @json($chartDisplay['labels']),
                         daily: @json($chartDisplay['data']),
-                        monthly: [] // optional placeholder if you’ll add later
                     };
                 </script>
 
-                <!-- Right Column: Donut Chart -->
                 <div class="col-lg-6 d-flex flex-column">
                     <!-- Chart Card -->
-                    <div class="card flex-fill">
-                        <div class="card-header">
+                    <div class="card ">
+                        <div class="card-header d-flex justify-content-between align-items-center">
                             <h3 class="card-title">
                                 <i class="fas fa-chart-line mr-1"></i> Expenses Breakdown
                             </h3>
-                            <div class="card-tools start-end">
-                                <ul class="nav nav-pills ml-auto" id="dateSwticher">
-                                    <li class="nav-item">
-                                        <a class="nav-link active" data-period="week" href="#">Week</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" data-period="month" href="#">Month</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" data-period="year" href="#">Annual</a>
-                                    </li>
-                                </ul>
-                            </div>
+
+                            <!-- Nav items on the right -->
+                            <ul class="nav nav-pills ms-auto" id="dateSwitcher">
+                                <li class="nav-item">
+                                    <a class="nav-link active" href="#" data-period="week">Week</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#" data-period="month">Month</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#" data-period="year">Annual</a>
+                                </li>
+                            </ul>
                         </div>
+
                         <div class="card-body">
                             <div class="chart">
                                 <canvas id="barChart"
@@ -413,6 +412,7 @@
                             </div>
                         </div>
                     </div>
+
                     <div class="row">
                         <div class="col-lg-6">
                             <div class="card border">
