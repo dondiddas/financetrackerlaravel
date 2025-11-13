@@ -72,25 +72,33 @@ public function getDailyExpenseBreakdown($userId)
 
 }
 
-    public function getDailyChart($userId) {
-        $daysinMonth = now()->daysInMonth;
-        $labels = [];
+    public function getWeeklyChart($userId) {
+        $daysInweek = 7;
+        $labels = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
         $dailyExpenses = [];
 
-        for ($day = 1; $day <= $daysinMonth; $day++){
-            $labels[] = $day;
+        $startOfWeek = now()->startOfWeek();
+        $endOfWeek = now()->endOfWeek();
+
+        foreach($labels as $index => $label) {
+            $date = $startOfWeek->copy()->addDays($index);
 
             $dailyAmount = Transaction::where('user_id', $userId)
             ->whereHas('category', function($query) {
                 $query->where('type','expense');
             })
-            ->whereYear('transaction_date',now()->year)
-            ->whereMonth('transaction_date',now()->month)
-            ->whereDay('transaction_date',now()->day)
+            ->whereDate('transaction_date', $date)
             ->sum('amount');
-
             $dailyExpenses[] = $dailyAmount;
         }
+        return [
+            'labels' => $labels,
+            'data' =>$dailyExpenses
+        ];
+    }
+
+    public function getMonthlyChart($userId) {
+        
     }
 
 

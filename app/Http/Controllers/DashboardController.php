@@ -53,6 +53,7 @@ class DashboardController extends Controller
         $dailyExpensesData = $this->expenseController->getDailyExpenses($id);
         $upcomingbillsData = $this->upcomingbill->getUpcomingBills($id);
         $dailyExpensesBreakdown = $this->expenseController->getDailyExpenseBreakdown($id);
+        $chartDisplay = $this->expenseController->getWeeklyChart($id);
 
 
         // --- Spending Rate ---
@@ -106,7 +107,8 @@ class DashboardController extends Controller
             'shadowColor',
             'pulseClass',
             'dailyExpensesBreakdown',
-            'categories'
+            'categories',
+            'chartDisplay',
         ));
     }
 }

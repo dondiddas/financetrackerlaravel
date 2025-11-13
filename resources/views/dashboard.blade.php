@@ -376,6 +376,14 @@
                         </div>
                     </div>
                 </div>
+                <script>
+                    window.chartData = {
+                        labels: @json($chartDisplay['labels']),
+                        daily: @json($chartDisplay['data']),
+                        monthly: [] // optional placeholder if you’ll add later
+                    };
+                </script>
+
                 <!-- Right Column: Donut Chart -->
                 <div class="col-lg-6 d-flex flex-column">
                     <!-- Chart Card -->
@@ -384,21 +392,24 @@
                             <h3 class="card-title">
                                 <i class="fas fa-chart-line mr-1"></i> Expenses Breakdown
                             </h3>
-                            <div class="card-tools">
-                                <ul class="nav nav-pills ml-auto">
+                            <div class="card-tools start-end">
+                                <ul class="nav nav-pills ml-auto" id="dateSwticher">
                                     <li class="nav-item">
-                                        <a class="nav-link active" href="#revenue-chart" data-toggle="tab">Area</a>
+                                        <a class="nav-link active" data-period="week" href="#">Week</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" href="#sales-chart" data-toggle="tab">Donut</a>
+                                        <a class="nav-link" data-period="month" href="#">Month</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-period="year" href="#">Annual</a>
                                     </li>
                                 </ul>
                             </div>
                         </div>
                         <div class="card-body">
                             <div class="chart">
-                                <canvas id="areaChart"
-                                    style="min-height: 330px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                                <canvas id="barChart"
+                                    style="min-height: 300px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
                             </div>
                         </div>
                     </div>

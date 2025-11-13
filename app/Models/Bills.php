@@ -14,3 +14,4 @@ class Bills extends Model
         'is_paid' => 'boolean',
     ];
 }
+
