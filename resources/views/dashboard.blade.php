@@ -57,24 +57,24 @@
                             </div>
                             <div class="text-center">
                                 <ul class="list-unstyled top-expenses-list text-start">
-                                    @forelse ($upcomingbillsData as $bill)
-                                        <li class="d-flex justify-content-between align-items-center border-bottom py-2">
-                                            <div class="text-start">
-                                                <div class="fw-semibold">{{ $bill->title }}</div>
-                                                <small class="text-muted">
-                                                    Due: {{ \Carbon\Carbon::parse($bill->due_date)->format('M d, Y') }}
-                                                </small>
+                                    @forelse ($topExpenses as $l_expense)
+                                        <!-- Entire row is clickable -->
+                                        <li class="d-flex justify-content-between align-items-center border-bottom py-2 px-2 clickable"
+                                            data-bs-toggle="modal" data-bs-target="#billModal{{ $l_expense->id }}"
+                                            style="cursor: pointer;">
+                                            <div class="text-start flex-grow-1">
+                                                <div class="fw-semibold">{{ $l_expense->category->name ?? 'No Name'  }}</div>
                                             </div>
-                                            <div class="fw-semibold text-end">
-                                                ₱{{ number_format($bill->amount, 2) }}
+                                            <div class="fw-semibold text-end me-2">
+                                                ₱{{ number_format($l_expense->total_amount, 2) }}
                                             </div>
+                                            <i class="fas fa-eye text-muted"></i>
                                         </li>
                                     @empty
-                                        <li class="text-muted py-2">No upcoming bills</li>
+                                        <li class="text-muted py-2">No Expenses Yet</li>
                                     @endforelse
                                 </ul>
                             </div>
-
                         </div>
                     </div>
                     <div class="card border">

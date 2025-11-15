@@ -73,8 +73,17 @@ public function getDailyExpenseBreakdown($userId)
 
 }
 
-
-
+    public function getTopExpenses($userId) {
+        return Transaction::where('user_id', $userId)
+        ->whereHas('category', function($squery) {
+            $squery->where('type', 'expense');
+        })
+        ->selectRaw('category_id, SUM(amount) as total_amount')
+        ->with('category:id,name')
+        ->groupBy('category_id')
+        ->orderByDesc('total_amount')
+        ->get();
+    }
 
     public function getWeeklyChart($userId) {
         $labels = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];

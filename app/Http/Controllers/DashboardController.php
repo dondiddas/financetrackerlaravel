@@ -14,7 +14,6 @@ class DashboardController extends Controller
     protected $allowanceController;
     protected $expenseController;
     protected $upcomingbill;
-
     protected $dailyLimiting;
 
     public function __construct(
@@ -52,15 +51,19 @@ class DashboardController extends Controller
         // --- Allowance + Expenses + Daily Expenses + Upcoming Bills---
         $AllowanceData = $this->allowanceController->getAllowanceOverview($id);
         $LastAllowanceData = $this->allowanceController->getLastMonthAllowance($id);
+
+
         $expensesData = $this->expenseController->getCurrentMonthExpenses($id);
         $dailyExpensesData = $this->expenseController->getDailyExpenses($id);
-        $upcomingbillsData = $this->upcomingbill->getUpcomingBills($id);
         $dailyExpensesBreakdown = $this->expenseController->getDailyExpenseBreakdown($id);
         $chartDisplay = $this->expenseController->getWeeklyChart($id);
+        $monthlyChart = $this->expenseController->getMonthlyChart($id);
+        $topExpenses = $this->expenseController->getTopExpenses($id);
+
         $DailyLimit = $this->dailyLimiting->getDailyLimit($id);
         $weeklyLimitChart = $this->dailyLimiting->getWeeklyLimits($id);
-        $monthlyChart = $this->expenseController->getMonthlyChart($id);
         $MonthlyLimitChart = $this->dailyLimiting->getMonthlyLimits($id);
+        $upcomingbillsData = $this->upcomingbill->getUpcomingBills($id);
 
         // --- Spending Rate ---
         $spendingRate = ($AllowanceData > 0)
@@ -118,7 +121,8 @@ class DashboardController extends Controller
             'DailyLimit',
             'weeklyLimitChart',
             'monthlyChart',
-            'MonthlyLimitChart'
+            'MonthlyLimitChart',
+            'topExpenses'
         ));
     }
 }
