@@ -429,13 +429,6 @@
                                                         Mark as Paid
                                                     </button>
                                                 </form>
-
-                                                <form {{-- action="{{ route('', $bill->id) }}" --}} method="POST">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-outline-success fw-semibold">
-                                                        Downpayment
-                                                    </button>
-                                                </form>
                                             </div>
                                         </div>
                                     </div>
