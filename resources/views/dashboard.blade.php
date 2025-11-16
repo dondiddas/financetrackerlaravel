@@ -34,7 +34,7 @@
                         </div>
                     </div>
                     {{-- Cash Balance --}}
-                    <div class="card border">
+                    <div class="card border no-hover">
                         <div class="card-body">
                             <div class="d-flex gap-2 mb-2 align-items-center">
                                 <i class="fas fa-money-bills text-muted"></i>
@@ -49,21 +49,24 @@
                         </div>
                     </div>
                     {{-- Top Expenses --}}
-                    <div class="card border">
+                    <div class="card border" style="height: 215px;">
                         <div class="card-body">
                             <div class="d-flex gap-2 mb-2 align-items-center">
                                 <i class="fas fa-money-bills text-muted"></i>
                                 <h6 class="mb-0 fw-semibold text-dark">Top Expenses</h6>
                             </div>
+
                             <div class="text-center">
                                 <ul class="list-unstyled top-expenses-list text-start">
                                     @forelse ($topExpenses as $l_expense)
-                                        <!-- Entire row is clickable -->
+                                        @php
+                                            $categorySlug = Str::slug($l_expense->category->name ?? 'No Name');
+                                        @endphp
                                         <li class="d-flex justify-content-between align-items-center border-bottom py-2 px-2 clickable"
-                                            data-bs-toggle="modal" data-bs-target="#billModal{{ $l_expense->id }}"
+                                            data-bs-toggle="modal" data-bs-target="#ExpensesModal{{ $categorySlug }}"
                                             style="cursor: pointer;">
                                             <div class="text-start flex-grow-1">
-                                                <div class="fw-semibold">{{ $l_expense->category->name ?? 'No Name'  }}</div>
+                                                <div class="fw-semibold">{{ $l_expense->category->name ?? 'No Name' }}</div>
                                             </div>
                                             <div class="fw-semibold text-end me-2">
                                                 ₱{{ number_format($l_expense->total_amount, 2) }}
@@ -77,6 +80,46 @@
                             </div>
                         </div>
                     </div>
+
+                    {{-- Modals per Category --}}
+                    @foreach ($expensesName as $categoryName => $transactions)
+                        @php
+                            $categorySlug = Str::slug($categoryName);
+                        @endphp
+                        <div class="modal fade" id="ExpensesModal{{ $categorySlug }}" tabindex="-1"
+                            aria-labelledby="ExpensesModalLabel{{ $categorySlug }}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title fw-semibold" id="ExpensesModalLabel{{ $categorySlug }}">
+                                            {{ $categoryName }}
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <ul class="list-group list-group-flush">
+                                            @foreach ($transactions as $expense)
+                                                <li
+                                                    class="list-group-item d-flex justify-content-between align-items-center py-2">
+                                                    <div class="text-muted" style="width: 120px;">
+                                                        {{ \Carbon\Carbon::parse($expense->transaction_date)->format('Y-m-d') }}
+                                                    </div>
+                                                    <div class="flex-grow-1 px-2">
+                                                        {{ $expense->note }}
+                                                    </div>
+                                                    <div class="fw-semibold text-end" style="width: 80px;">
+                                                        ₱{{ number_format($expense->amount, 2) }}
+                                                    </div>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+
                     <div class="card border">
                         <div class="card-body text-center">
                             <div class="d-flex gap-2 mb-2 align-items-center justify-content-center">
@@ -160,7 +203,7 @@
 
                 <!-- MOney Spent/Daily Expenses -->
                 <div class="col-lg-3 col-6 mb-2">
-                    <div class="card border {{ $pulseClass }}" style="box-shadow: {{ $shadowColor }};">
+                    <div class="card border {{ $pulseClass }} no-hover" style="box-shadow: {{ $shadowColor }}; ">
                         <div class="card-body">
                             <div class="d-flex gap-2 mb-2 align-items-center">
                                 <i class="fas fa-chart-pie text-muted"></i>
@@ -347,7 +390,7 @@
 
 
                     {{-- Upcoming Bills --}}
-                    <div class="card border">
+                    <div class="card border" style="height: 215px;">
                         <div class="card-body">
                             <div class="d-flex gap-2 mb-2 align-items-center">
                                 <i class="fas fa-money-bills text-muted"></i>
@@ -403,37 +446,36 @@
                                                 <p>{{ \Carbon\Carbon::parse($bill->due_date)->format('F j, Y') }}</p>
                                             </div>
                                         </div>
-                                            <!-- Description Form -->
-                                            <form action="{{ route('bills.updateDescription', $bill->id) }}"
-                                                method="POST">
-                                                @csrf
-                                                @method('PUT')
-                                                <div class="mb-3">
-                                                    <label for="description{{ $bill->id }}"
-                                                        class="form-label fw-semibold">Description</label>
-                                                    <textarea class="form-control" id="description{{ $bill->id }}" name="description" rows="3"
-                                                        placeholder="Add or update description...">{{ $bill->description }}</textarea>
-                                                </div>
-                                                <div class="d-flex justify-content-end mb-2">
-                                                    <button type="submit" class="btn btn-primary fw-semibold">Save
-                                                        Description</button>
-                                                </div>
-                                            </form>
-                                        </div>
-
-                                        <div class="modal-footer">
-                                            <div class="d-flex gap-2 justify-content-end">
-                                                <form {{-- action="{{ route('', $bill->id) }}" --}} method="POST">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-success fw-semibold">
-                                                        Mark as Paid
-                                                    </button>
-                                                </form>
+                                        <!-- Description Form -->
+                                        <form action="{{ route('bills.updateDescription', $bill->id) }}" method="POST">
+                                            @csrf
+                                            @method('PUT')
+                                            <div class="mb-3">
+                                                <label for="description{{ $bill->id }}"
+                                                    class="form-label fw-semibold">Description</label>
+                                                <textarea class="form-control" id="description{{ $bill->id }}" name="description" rows="3"
+                                                    placeholder="Add or update description...">{{ $bill->description }}</textarea>
                                             </div>
+                                            <div class="d-flex justify-content-end mb-2">
+                                                <button type="submit" class="btn btn-primary fw-semibold">Save
+                                                    Description</button>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <div class="modal-footer">
+                                        <div class="d-flex gap-2 justify-content-end">
+                                            <form {{-- action="{{ route('', $bill->id) }}" --}} method="POST">
+                                                @csrf
+                                                <button type="submit" class="btn btn-success fw-semibold">
+                                                    Mark as Paid
+                                                </button>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
                     @endforeach
 
                     <div class="card border">
@@ -466,7 +508,7 @@
 
                 <div class="col-lg-6 d-flex flex-column">
                     <!-- Chart Card -->
-                    <div class="card ">
+                    <div class="card no-hover">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h3 class="card-title mb-0 fw-semibold text-dark">
                                 <i class="fas fa-chart-line mr-1 mb-0 fw-semibold text-dark"></i> Expenses Breakdown

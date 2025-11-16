@@ -203,7 +203,8 @@ body {
     color: var(--bs-body-color);
     text-align: var(--bs-body-text-align);
     background-color: var(--bs-body-bg);
-    -webkit-text-size-adjust: 100%;
+     -webkit-text-size-adjust: 100%;
+     text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent
 }
 
@@ -462,8 +463,9 @@ caption {
 }
 
 th {
-    text-align: inherit;
-    text-align: -webkit-match-parent
+    text-align: match-parent; 
+    text-align: -webkit-match-parent;
+
 }
 
 tbody,
@@ -2746,9 +2748,8 @@ textarea.form-control-lg {
     background-position: center;
     background-size: contain;
     border: var(--bs-border-width) solid var(--bs-border-color);
-    -webkit-print-color-adjust: exact;
-    color-adjust: exact;
-    print-color-adjust: exact
+    -webkit-print-color-adjust: exact;  
+    print-color-adjust: exact;   
 }
 
 .form-check-input[type=checkbox] {

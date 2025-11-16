@@ -3,6 +3,11 @@
         Options -MultiViews -Indexes
     </IfModule>
 
+    # Ensure JavaScript is served with UTF-8 charset
+    <FilesMatch "\.js$">
+        AddType "application/javascript; charset=UTF-8"
+    </FilesMatch>
+
     RewriteEngine On
 
     # Handle Authorization Header

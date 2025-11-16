@@ -50,7 +50,7 @@
 html {
     font-family: sans-serif;
     line-height: 1.15;
-    -webkit-text-size-adjust: 100%;
+ -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent
 }
 
@@ -235,8 +235,8 @@ caption {
 }
 
 th {
-    text-align: inherit;
-    text-align: -webkit-match-parent
+    text-align: match-parent;
+    text-align: -webkit-match-parent;
 }
 
 label {
@@ -4239,8 +4239,8 @@ input[type=submit].btn-block {
     display: block;
     min-height: 1.5rem;
     padding-left: 1.5rem;
-    -webkit-print-color-adjust: exact;
-    color-adjust: exact
+    -webkit-print-color-adjust: exact;  
+    print-color-adjust: exact;   
 }
 
 .custom-control-inline {
