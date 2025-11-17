@@ -128,3 +128,38 @@ h6 {
 .clickable-bill:hover {
     background-color: #f8f9fa; 
 }
+
+.card::-webkit-scrollbar {
+  width: 6px;
+}
+
+.card::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+.kpi-highlight {
+  border-top: 4px solid #4CAF50;
+  border-radius: 16px; /* same radius as your card */
+  overflow: hidden; /* ensures the highlight follows the rounded corners */
+}
+
+.kpi-allowance {
+  border-top: 4px solid #3B82F6;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.kpi-outflow {
+  border-top: 4px solid #EF4444;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.kpi-daily {
+  border-top: 4px solid #F59E0B;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+

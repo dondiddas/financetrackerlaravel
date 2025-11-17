@@ -18,7 +18,7 @@
                     <!-- Allowance Overview -->
                     <div class="card border mb-3" data-bs-toggle="modal" data-bs-target="#allowanceovermodal"
                         style="cursor: pointer;">
-                        <div class="card-body">
+                        <div class="card-body kpi-allowance">
                             <div class="d-flex gap-2 mb-2 align-items-center">
                                 <i class="fas fa-piggy-bank text-muted"></i>
                                 <h6 class="mb-0 fw-semibold text-dark">Allowance Overview</h6>
@@ -35,8 +35,8 @@
                     </div>
                     {{-- Cash Balance --}}
                     <div class="card border no-hover">
-                        <div class="card-body">
-                            <div class="d-flex gap-2 mb-2 align-items-center">
+                        <div class="card-body kpi-highlight">
+                            <div class="d-flex gap-2 mb-1 align-items-center">
                                 <i class="fas fa-money-bills text-muted"></i>
                                 <h6 class="mb-0 fw-semibold text-dark">Cash Balance</h6>
                             </div>
@@ -203,8 +203,8 @@
 
                 <!-- MOney Spent/Daily Expenses -->
                 <div class="col-lg-3 col-6 mb-2">
-                    <div class="card border {{ $pulseClass }} no-hover" style="box-shadow: {{ $shadowColor }}; ">
-                        <div class="card-body">
+                    <div class="card border {{ $pulseClass }} no-hover" style="box-shadow: {{ $shadowColor }};">
+                        <div class="card-body kpi-outflow">
                             <div class="d-flex gap-2 mb-2 align-items-center">
                                 <i class="fas fa-chart-pie text-muted"></i>
                                 <h6 class="mb-0 fw-semibold text-dark">Monthly Outflow</h6>
@@ -223,8 +223,8 @@
                     <!-- Daily Expenses -->
                     <div class="card border" data-bs-toggle="modal" data-bs-target="#dailyExpensesModal"
                         style="cursor: pointer;">
-                        <div class="card-body">
-                            <div class="d-flex gap-2 mb-2">
+                        <div class="card-body kpi-daily">
+                            <div class="d-flex gap-2 mb-1">
                                 <i class="fas fa-chart-pie text-muted"></i>
                                 <h6 class="mb-0 fw-semibold text-dark">Daily Expenses</h6>
                             </div>
@@ -428,7 +428,7 @@
                             <div class="modal-dialog modal-dialog-centered">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title fw-semibold" id="billModalLabel{{ $bill->id }}">
+                                        <h5 class="modal-title fw-semibold " id="billModalLabel{{ $bill->id }}">
                                             {{ $bill->bill_name }}
                                         </h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"
