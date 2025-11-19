@@ -46,7 +46,6 @@ class AllowanceController extends Controller
         'user_id' => auth()->id() ?? 1,
     ]);
 
-    // Create the transaction
     Transaction::create([
         'user_id' => auth()->id() ?? 1,
         'category_id' => $category->id,

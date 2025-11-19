@@ -6,14 +6,13 @@
     <div class="position-relative ">
 
         <div class="col">
-            <h4 class="fw-semibold mb-0 pe-5">
+            <h4 class="fw-semibold mb-0 fs-2 fs-md-1 pe-5">
                 {{ $greeting }}, {{ $userName }}!
             </h4>
             <p class="text-muted mb-2 medium">{{ now()->format('l, F j, Y') }}</p>
         </div>
         <div class="mt-2">
             <div class="row">
-                <!-- Left Column: Allowance Overview + Spending Rate -->
                 <div class="col-lg-3 col-6 mb-3 d-flex flex-column">
                     <!-- Allowance Overview -->
                     <div class="card border mb-3" data-bs-toggle="modal" data-bs-target="#allowanceovermodal"
@@ -24,7 +23,7 @@
                                 <h6 class="mb-0 fw-semibold text-dark">Allowance Overview</h6>
                             </div>
                             <div class="text-center">
-                                <h1 class="fw-semibold mb-0">
+                                <h1 class="fw-semibold mb-0 fs-2 fs-md-1">
                                     ₱{{ number_format($AllowanceData, 2) }}
                                 </h1>
                                 <p class="text-secondary mt-1 mb-0 small">
@@ -33,7 +32,7 @@
                             </div>
                         </div>
                     </div>
-                    {{-- Cash Balance --}}
+                    {{-- Goals --}}
                     <div class="card border no-hover">
                         <div class="card-body kpi-highlight">
                             <div class="d-flex gap-2 mb-1 align-items-center">
@@ -41,15 +40,29 @@
                                 <h6 class="mb-0 fw-semibold text-dark">Cash Balance</h6>
                             </div>
                             <div class="text-center">
-                                <h1 class="fw-semibold mb-0">
+                                <h1 class="fw-semibold mb-0 fs-2 fs-md-1">
                                     ₱{{ number_format($cashBalance, 1) }}
                                 </h1>
                                 <div class="my-4"></div>
                             </div>
                         </div>
                     </div>
+                    <div class="card border no-hover">
+                        <div class="card-body kpi-highlight">
+                            <div class="d-flex gap-2 mb-1 align-items-center">
+                                <i class="fas fa-money-bills text-muted"></i>
+                                <h6 class="mb-0 fw-semibold text-dark">Savings</h6>
+                            </div>
+                            <div class="text-center">
+                                <h1 class="fw-semibold mb-0 fs-2 fs-md-1">
+                                    ₱{{ number_format($cashBalance, 2) }}
+                                </h1>
+                                <div class="my-4"></div>
+                            </div>
+                        </div>
+                    </div>
                     {{-- Top Expenses --}}
-                    <div class="card border" style="height: 215px;">
+                    <div class="card border" style="height: 180px;">
                         <div class="card-body">
                             <div class="d-flex gap-2 mb-2 align-items-center">
                                 <i class="fas fa-money-bills text-muted"></i>
@@ -71,7 +84,6 @@
                                             <div class="fw-semibold text-end me-2">
                                                 ₱{{ number_format($l_expense->total_amount, 2) }}
                                             </div>
-                                            <i class="fas fa-eye text-muted"></i>
                                         </li>
                                     @empty
                                         <li class="text-muted py-2">No Expenses Yet</li>
@@ -120,15 +132,6 @@
                         </div>
                     @endforeach
 
-                    <div class="card border">
-                        <div class="card-body text-center">
-                            <div class="d-flex gap-2 mb-2 align-items-center justify-content-center">
-                                <i class="fas fa-money-bills text-muted"></i>
-                                <h6 class="mb-0 fw-semibold text-dark">Suggest Content</h6>
-                            </div>
-                            <p>s</p>
-                        </div>
-                    </div>
                 </div>
                 {{-- Allowance Overview Modal --}}
                 <div class="modal fade" id="allowanceovermodal" tabindex="-1" aria-labelledby="allowanceovermodal"
@@ -210,11 +213,11 @@
                                 <h6 class="mb-0 fw-semibold text-dark">Monthly Outflow</h6>
                             </div>
                             <div class="text-center">
-                                <h1 class="fw-semibold mb-0">
+                                <h1 class="fw-semibold mb-0 fs-2 fs-md-1">
                                     ₱{{ number_format($expensesData, 2) }}
                                 </h1>
-                                <p class="{{ $rateColor }} text-secondary mt-1 mb-0 small">
-                                    {{ number_format($spendingRate, 1) }}% used this month's allowance
+                                <p class="{{ $rateColor }} text-secondary mt-1 mb-0 small ">
+                                    {{ number_format($spendingRate, 1) }}% spent this month
                                 </p>
                             </div>
                         </div>
@@ -229,7 +232,7 @@
                                 <h6 class="mb-0 fw-semibold text-dark">Daily Expenses</h6>
                             </div>
                             <div class="text-center">
-                                <h1 class="fw-semibold mb-0">
+                                <h1 class="fw-semibold mb-0 fs-2 fs-md-1">
                                     {{ number_format($dailyExpensesData, 2) }}
                                 </h1>
                                 <p class="text-secondary mt-1 mb-0 small border" data-bs-toggle="modal"
@@ -387,10 +390,26 @@
                         </div>
                     </div>
 
+                    {{-- Goals --}}
+                    <div class="card border no-hover">
+                        <div class="card-body kpi-highlight">
+                            <div class="d-flex gap-2 mb-1 align-items-center">
+                                <i class="fas fa-money-bills text-muted"></i>
+                                <h6 class="mb-0 fw-semibold text-dark">Goals</h6>
+                            </div>
+                            <div class="text-center">
+                                <h1 class="fw-semibold mb-0 fs-2 fs-md-1">
+                                    ₱{{ number_format($cashBalance, 2) }}
+                                </h1>
+                                <div class="my-4"></div>
+                            </div>
+                        </div>
+                    </div>
+
 
 
                     {{-- Upcoming Bills --}}
-                    <div class="card border" style="height: 215px;">
+                    <div class="card border" style="height: 180px;">
                         <div class="card-body">
                             <div class="d-flex gap-2 mb-2 align-items-center">
                                 <i class="fas fa-money-bills text-muted"></i>
@@ -412,7 +431,6 @@
                                             <div class="fw-semibold text-end me-2">
                                                 ₱{{ number_format($bill->amount, 2) }}
                                             </div>
-                                            <i class="fas fa-eye text-muted"></i>
                                         </li>
                                     @empty
                                         <li class="text-muted py-2">No upcoming bills</li>
@@ -477,15 +495,6 @@
                             </div>
                         </div>
                     @endforeach
-
-                    <div class="card border">
-                        <div class="card-body text-center">
-                            <div class="d-flex gap-2 mb-2 align-items-center justify-content-center">
-                                <i class="fas fa-money-bills text-muted"></i>
-                                <h6 class="mb-0 fw-semibold text-dark">Motivation</h6>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <script>

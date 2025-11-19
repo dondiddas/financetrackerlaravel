@@ -82,7 +82,7 @@ h6 {
   }
 
   .top-expenses-list {
-    max-height: 9em; 
+    max-height: 110px; 
     overflow-y: auto;
     margin: 0;
     padding: 0;
