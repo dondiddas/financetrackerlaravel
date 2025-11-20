@@ -60,6 +60,9 @@ class DashboardController extends Controller
         $monthlyChart = $this->expenseController->getMonthlyChart($id);
         $topExpenses = $this->expenseController->getTopExpenses($id);
         $expensesName = $this->expenseController->getAllNamesExpenses(($id));
+        $ExpensesPercentage = $this->expenseController->getExpensesPercentage($id);
+        $burnRate = $this->expenseController->getBurnRate($id);
+
 
         $DailyLimit = $this->dailyLimiting->getDailyLimit($id);
         $weeklyLimitChart = $this->dailyLimiting->getWeeklyLimits($id);
@@ -124,7 +127,9 @@ class DashboardController extends Controller
             'monthlyChart',
             'MonthlyLimitChart',
             'topExpenses',
-            'expensesName'
+            'expensesName',
+            'ExpensesPercentage',
+            'burnRate'
         ));
     }
 }

@@ -64,18 +64,31 @@
                         </div>
                     </div>
 
-                    <div class="card border">
-                        <div class="card-body">
-                            <div class="d-flex gap-2 mb-2 align-items-center">
-                                <i class="fas fa-lightbulb text-muted"></i>
-                                <h6 class="mb-0 fw-semibold text-dark">Spending Insights</h6>
-                            </div>
-                            <p class="text-muted small">
-                                Get a quick analysis of your spending habits or other financial data here.
-                            </p>
+                    <div class="card border shadow-sm">
+    <div class="card-body">
+        <div class="d-flex gap-2 align-items-center mb-1">
+            <i class="fas fa-fire text-muted"></i>
+            <h6 class="mb-0 fw-semibold text-dark">Burn Rate</h6>
+        </div>
 
-                        </div>
-                    </div>
+        <div class="text-center">
+            <h1 class="fw-semibold mb-1 fs-2 fs-md-1">
+                ₱{{ number_format($burnRate['daily'], 2) }}
+            </h1>
+            <p class="text-muted small mb-1">per day on average</p>
+
+            <div class="mt-2">
+                <span class="badge bg-light text-dark">
+                    Weekly: ₱{{ number_format($burnRate['weekly'], 2) }}
+                </span>
+                <span class="badge bg-light text-dark mt-1">
+                    Monthly: ₱{{ number_format($burnRate['monthly'], 2) }}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 
                 </div>
@@ -351,23 +364,29 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card border shadow-sm">
-                        <div class="card-body d-flex flex-column align-items-start gap-2">
-                            <h6 class="card-title fw-semibold mb-0">Expense Trends</h6>
-                            <div class="d-flex align-items-center gap-2">
-                                <!-- Arrow icon -->
-                                <span class="trend-icon text-danger" style="font-size: 1rem;">
-                                    <i class="fa-solid fa-arrow-up"></i>
+                    <div class="card border no-hover">
+                        <div class="card-body">
+                            <!-- Icon + Title -->
+                            <div class="d-flex gap-2 mb-1 align-items-center">
+                                <span
+                                    class="trend-icon {{ $ExpensesPercentage['trend'] == 'up' ? 'text-danger' : 'text-success' }}">
+                                    <i class="fa-solid fa-arrow-{{ $ExpensesPercentage['trend'] }}"></i>
                                 </span>
-                                <!-- Percentage -->
-                                <span class="trend-percentage fw-bold" style="font-size: 1.2rem;">18%</span>
-                                <span class="trend-text text-muted" style="font-size: 0.9rem;">This Week</span>
+                                <h6 class="mb-0 fw-semibold text-dark">Expense Trends</h6>
                             </div>
-                            <p class="trend-description text-muted mb-0">
-                                Spending increased compared to last week
-                            </p>
+                            <div class="text-center">
+                                <h1 class="fw-semibold mb-0 fs-2 fs-md-1">
+                                    {{ $ExpensesPercentage['percentage_change'] }}%
+                                </h1>
+                                <p class="text-muted mb-0 mt-1">
+                                    Spending {{ $ExpensesPercentage['trend'] == 'up' ? 'increased' : 'decreased' }}
+                                    compared to last week
+                                </p>
+                            </div>
                         </div>
                     </div>
+
+
 
 
 
@@ -422,36 +441,48 @@
                         <div class="col-lg-6">
                             {{-- Upcoming Bills --}}
                             <div class="card border" style="height: 215px;">
-                                <div class="card-body">
-                                    <div class="d-flex gap-2 mb-2 align-items-center">
-                                        <i class="fas fa-money-bills text-muted"></i>
-                                        <h6 class="mb-0 fw-semibold text-dark">Upcoming Bills</h6>
-                                    </div>
-                                    <div class="text-center">
-                                        <ul class="list-unstyled top-expenses-list text-start">
-                                            @forelse ($upcomingbillsData as $bill)
-                                                <!-- Entire row is clickable -->
-                                                <li class="d-flex justify-content-between align-items-center border-bottom py-2 px-2 clickable"
-                                                    data-bs-toggle="modal" data-bs-target="#billModal{{ $bill->id }}"
-                                                    style="cursor: pointer;">
-                                                    <div class="text-start flex-grow-1">
-                                                        <div class="fw-semibold">{{ $bill->bill_name }}</div>
-                                                        <small class="text-muted">
-                                                            Due:
-                                                            {{ \Carbon\Carbon::parse($bill->due_date)->format('M d, Y') }}
-                                                        </small>
-                                                    </div>
-                                                    <div class="fw-semibold text-end me-2">
-                                                        ₱{{ number_format($bill->amount, 2) }}
-                                                    </div>
-                                                </li>
-                                            @empty
-                                                <li class="text-muted py-2">No upcoming bills</li>
-                                            @endforelse
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
+    <div class="card-body">
+
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="d-flex gap-2 align-items-center">
+                <i class="fas fa-money-bills text-muted"></i>
+                <h6 class="mb-0 fw-semibold text-dark">Upcoming Bills</h6>
+            </div>
+
+            <!-- Add New Bill Button -->
+            <button class="btn btn-sm btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#addBillModal">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+
+        <div class="text-center">
+            <ul class="list-unstyled top-expenses-list text-start">
+                @forelse ($upcomingbillsData as $bill)
+                    <li class="d-flex justify-content-between align-items-center border-bottom py-2 px-2 clickable"
+                        data-bs-toggle="modal"
+                        data-bs-target="#billModal{{ $bill->id }}"
+                        style="cursor: pointer;">
+                        <div class="text-start flex-grow-1">
+                            <div class="fw-semibold">{{ $bill->bill_name }}</div>
+                            <small class="text-muted">
+                                Due: {{ \Carbon\Carbon::parse($bill->due_date)->format('M d, Y') }}
+                            </small>
+                        </div>
+                        <div class="fw-semibold text-end me-2">
+                            ₱{{ number_format($bill->amount, 2) }}
+                        </div>
+                    </li>
+                @empty
+                    <li class="text-muted py-2">No upcoming bills</li>
+                @endforelse
+            </ul>
+        </div>
+
+    </div>
+</div>
+
                         </div>
                         <!-- Bill Modal -->
                         @foreach ($upcomingbillsData as $bill)

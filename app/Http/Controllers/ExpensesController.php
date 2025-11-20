@@ -176,6 +176,36 @@ public function getExpensesPercentage($userId) {
 
 }
 
+public function getBurnRate($userId)
+{
+    $last7Days = Transaction::where('user_id', $userId)
+        ->whereBetween('created_at', [
+            now()->subDays(6)->startOfDay(),
+            now()->endOfDay()
+        ])
+        ->sum('amount');
+
+    $dailyBurn = $last7Days / 7;
+
+    $last30Days = Transaction::where('user_id', $userId)
+        ->whereBetween('created_at', [
+            now()->subDays(29)->startOfDay(),
+            now()->endOfDay()
+        ])
+        ->sum('amount');
+
+    $weeklyBurn = $last30Days / 4.285;
+
+    $monthlyBurn = $last30Days;
+
+    return [
+        'daily'   => round($dailyBurn, 2),
+        'weekly'  => round($weeklyBurn, 2),
+        'monthly' => round($monthlyBurn, 2),
+    ];
+}
+
+
 
 
 }
