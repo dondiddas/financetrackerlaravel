@@ -1,5 +1,5 @@
-
-<style>/* Default link styles */
+<style>
+/* Default link styles */
 #sidebar a {
     color: #fff;
     text-decoration: none;
@@ -87,7 +87,6 @@
         transform: translateX(0);
     }
 
-    /* When mobile menu opens, always show text */
     #sidebar.active .link-text {
         opacity: 1 !important;
     }
@@ -96,7 +95,8 @@
         margin-left: 0 !important;
     }
 }
-/* Hide the desktop sidebar in mobile */
+
+/* Hide desktop sidebar on mobile */
 @media (max-width: 767px) {
     #sidebar {
         display: none;
@@ -115,6 +115,8 @@
     align-items: center;
     border-top: 1px solid rgba(255,255,255,0.2);
     z-index: 3000;
+    background: #111;
+    transition: transform 0.25s ease-in-out; /* 🔥 Added for smooth hide/show */
 }
 
 /* Nav item */
@@ -139,9 +141,6 @@
     color: #fff;
     font-weight: 600;
 }
-
-
-
 </style>
 <div id="sidebar" class="bg-dark text-white">
     <ul class="sidebar-nav list-unstyled m-0 p-0">
@@ -151,14 +150,15 @@
             </a>
         </li>
 
-        <li><a href="#" class="d-flex align-items-center gap-4  py-2"><i class="fa-solid fa-bolt"></i> <span class="link-text">Shortcut</span></a></li>
+        <li><a href="#" class="d-flex align-items-center gap-4 py-2"><i class="fa-solid fa-bolt"></i> <span class="link-text">Shortcut</span></a></li>
         <li><a href="#" class="d-flex align-items-center gap-4 py-2"><i class="fa-solid fa-cloud-arrow-down"></i> <span class="link-text">Overview</span></a></li>
-        <li><a href="#" class="d-flex align-items-center gap-4  py-2"><i class="fa-solid fa-calendar"></i> <span class="link-text">Events</span></a></li>
-        <li><a href="#" class="d-flex align-items-center gap-4  py-2"><i class="fa-brands fa-youtube"></i> <span class="link-text">About</span></a></li>
-        <li><a href="#" class="d-flex align-items-center gap-4  py-2"><i class="fa-solid fa-wrench"></i> <span class="link-text">Services</span></a></li>
-        <li><a href="#" class="d-flex align-items-center gap-4  py-2"><i class="fa-solid fa-server"></i> <span class="link-text">Contact</span></a></li>
+        <li><a href="#" class="d-flex align-items-center gap-4 py-2"><i class="fa-solid fa-calendar"></i> <span class="link-text">Events</span></a></li>
+        <li><a href="#" class="d-flex align-items-center gap-4 py-2"><i class="fa-brands fa-youtube"></i> <span class="link-text">About</span></a></li>
+        <li><a href="#" class="d-flex align-items-center gap-4 py-2"><i class="fa-solid fa-wrench"></i> <span class="link-text">Services</span></a></li>
+        <li><a href="#" class="d-flex align-items-center gap-4 py-2"><i class="fa-solid fa-server"></i> <span class="link-text">Contact</span></a></li>
     </ul>
 </div>
+
 <!-- Mobile Bottom Navbar -->
 <nav id="mobileNav" class="mobile-nav bg-dark text-white d-md-none">
     <a href="{{ route('dashboard') }}" class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
@@ -186,4 +186,3 @@
         <span>Contact</span>
     </a>
 </nav>
-

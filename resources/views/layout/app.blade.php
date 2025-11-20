@@ -40,6 +40,25 @@
 //     document.getElementById('sidebar').classList.toggle('active');
 // });
 </script>
+<script>
+let lastScroll = 0;
+const mobileNav = document.getElementById("mobileNav");
+
+window.addEventListener("scroll", function () {
+    let currentScroll = window.scrollY;
+
+    if (currentScroll > lastScroll) {
+        // scrolling down → hide navbar
+        mobileNav.style.transform = "translateY(100%)";
+    } else {
+        // scrolling up → show navbar
+        mobileNav.style.transform = "translateY(0)";
+    }
+
+    lastScroll = currentScroll;
+});
+</script>
+
 
 </body>
 </html>

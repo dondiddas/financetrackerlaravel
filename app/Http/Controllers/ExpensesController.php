@@ -147,6 +147,35 @@ public function getMonthlyChart($userId) {
     ];
 }
 
+public function getExpensesPercentage($userId) {
+    $startofWeek = Carbon::now()->startOfWeek();
+    $endofweek = Carbon::now()->endOfWeek();
+
+    $currentWeekExpenses = Transaction::where('user_id', $userId)
+    ->whereBetween('created_at',[$startofWeek, $endofweek])
+    ->sum('amount');
+
+    $previousWeekExpenses = Transaction::where('user_id', $userId)
+    ->whereBetween('created_at', 
+    [Carbon::now()->subWeek()->startOfWeek(),
+    Carbon::now()->subWeek()->endOfWeek()])
+    ->sum('amount');
+
+    $percentageChange = $previousWeekExpenses > 0
+    ? (($currentWeekExpenses - $previousWeekExpenses) / $previousWeekExpenses) * 100
+    : 0;
+
+    $trend = $percentageChange>=0 ? 'up' : 'down';
+
+    return[
+        'current_week' =>$currentWeekExpenses,
+        'previous_week' =>$previousWeekExpenses,
+        'percentage_change'=>round($percentageChange, 2),
+        'trend' =>$trend
+    ];
+
+}
+
 
 
 }

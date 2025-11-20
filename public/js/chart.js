@@ -1,7 +1,6 @@
 $(document).ready(function () {
   var ctx = $('#barChart').get(0).getContext('2d');
 
-  // --- Chart datasets (replace with real data from PHP later) ---
 var chartDatasets = {
     week: {
         labels: window.chartData.week.labels,
@@ -118,3 +117,47 @@ barChart.update();
 
   });
 });
+
+$(function () {
+
+    function getSize(elementId) {
+      const el = document.getElementById(elementId);
+      return {
+        width: el.offsetWidth,
+        height: el.offsetHeight
+      };
+    }
+
+    // Example data: x-axis + 2 series
+    let data = [
+      [0, 1, 2, 3, 4, 5, 6],       // x-axis
+      [28, 48, 40, 19, 86, 27, 90], // series 1
+      [65, 59, 80, 81, 56, 55, 40]  // series 2
+    ];
+
+    const optsLineChart = {
+      ...getSize('lineChart'),
+      scales: {
+        x: { time: false },
+        y: { range: [0, 100] }
+      },
+      series: [
+        {}, // x-axis
+        { fill: 'transparent', width: 3, stroke: 'rgba(60,141,188,1)' },
+        { fill: 'transparent', width: 3, stroke: '#c1c7d1' }
+      ],
+      axes: [
+        { stroke: '#ccc', grid: { show: true } }, // x-axis
+        { stroke: '#ccc', grid: { show: true } }  // y-axis
+      ]
+    };
+
+    let lineChart = new uPlot(optsLineChart, data, document.getElementById('lineChart'));
+
+    // Make it responsive
+    window.addEventListener("resize", e => {
+      lineChart.setSize(getSize('lineChart'));
+    });
+});
+
+

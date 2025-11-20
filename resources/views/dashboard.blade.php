@@ -32,7 +32,7 @@
                             </div>
                         </div>
                     </div>
-                    {{-- Goals --}}
+                    {{-- Cash Balance --}}
                     <div class="card border no-hover">
                         <div class="card-body kpi-highlight">
                             <div class="d-flex gap-2 mb-1 align-items-center">
@@ -41,12 +41,14 @@
                             </div>
                             <div class="text-center">
                                 <h1 class="fw-semibold mb-0 fs-2 fs-md-1">
-                                    ₱{{ number_format($cashBalance, 1) }}
+                                    ₱{{ number_format($cashBalance, 2) }}
                                 </h1>
                                 <div class="my-4"></div>
                             </div>
                         </div>
                     </div>
+
+                    {{-- Savings --}}
                     <div class="card border no-hover">
                         <div class="card-body kpi-highlight">
                             <div class="d-flex gap-2 mb-1 align-items-center">
@@ -61,76 +63,20 @@
                             </div>
                         </div>
                     </div>
-                    {{-- Top Expenses --}}
-                    <div class="card border" style="height: 180px;">
+
+                    <div class="card border">
                         <div class="card-body">
                             <div class="d-flex gap-2 mb-2 align-items-center">
-                                <i class="fas fa-money-bills text-muted"></i>
-                                <h6 class="mb-0 fw-semibold text-dark">Top Expenses</h6>
+                                <i class="fas fa-lightbulb text-muted"></i>
+                                <h6 class="mb-0 fw-semibold text-dark">Spending Insights</h6>
                             </div>
+                            <p class="text-muted small">
+                                Get a quick analysis of your spending habits or other financial data here.
+                            </p>
 
-                            <div class="text-center">
-                                <ul class="list-unstyled top-expenses-list text-start">
-                                    @forelse ($topExpenses as $l_expense)
-                                        @php
-                                            $categorySlug = Str::slug($l_expense->category->name ?? 'No Name');
-                                        @endphp
-                                        <li class="d-flex justify-content-between align-items-center border-bottom py-2 px-2 clickable"
-                                            data-bs-toggle="modal" data-bs-target="#ExpensesModal{{ $categorySlug }}"
-                                            style="cursor: pointer;">
-                                            <div class="text-start flex-grow-1">
-                                                <div class="fw-semibold">{{ $l_expense->category->name ?? 'No Name' }}</div>
-                                            </div>
-                                            <div class="fw-semibold text-end me-2">
-                                                ₱{{ number_format($l_expense->total_amount, 2) }}
-                                            </div>
-                                        </li>
-                                    @empty
-                                        <li class="text-muted py-2">No Expenses Yet</li>
-                                    @endforelse
-                                </ul>
-                            </div>
                         </div>
                     </div>
 
-                    {{-- Modals per Category --}}
-                    @foreach ($expensesName as $categoryName => $transactions)
-                        @php
-                            $categorySlug = Str::slug($categoryName);
-                        @endphp
-                        <div class="modal fade" id="ExpensesModal{{ $categorySlug }}" tabindex="-1"
-                            aria-labelledby="ExpensesModalLabel{{ $categorySlug }}" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title fw-semibold" id="ExpensesModalLabel{{ $categorySlug }}">
-                                            {{ $categoryName }}
-                                        </h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                            aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <ul class="list-group list-group-flush">
-                                            @foreach ($transactions as $expense)
-                                                <li
-                                                    class="list-group-item d-flex justify-content-between align-items-center py-2">
-                                                    <div class="text-muted" style="width: 120px;">
-                                                        {{ \Carbon\Carbon::parse($expense->transaction_date)->format('Y-m-d') }}
-                                                    </div>
-                                                    <div class="flex-grow-1 px-2">
-                                                        {{ $expense->note }}
-                                                    </div>
-                                                    <div class="fw-semibold text-end" style="width: 80px;">
-                                                        ₱{{ number_format($expense->amount, 2) }}
-                                                    </div>
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
 
                 </div>
                 {{-- Allowance Overview Modal --}}
@@ -405,96 +351,26 @@
                             </div>
                         </div>
                     </div>
-
-
-
-                    {{-- Upcoming Bills --}}
-                    <div class="card border" style="height: 180px;">
-                        <div class="card-body">
-                            <div class="d-flex gap-2 mb-2 align-items-center">
-                                <i class="fas fa-money-bills text-muted"></i>
-                                <h6 class="mb-0 fw-semibold text-dark">Upcoming Bills</h6>
+                    <div class="card border shadow-sm">
+                        <div class="card-body d-flex flex-column align-items-start gap-2">
+                            <h6 class="card-title fw-semibold mb-0">Expense Trends</h6>
+                            <div class="d-flex align-items-center gap-2">
+                                <!-- Arrow icon -->
+                                <span class="trend-icon text-danger" style="font-size: 1rem;">
+                                    <i class="fa-solid fa-arrow-up"></i>
+                                </span>
+                                <!-- Percentage -->
+                                <span class="trend-percentage fw-bold" style="font-size: 1.2rem;">18%</span>
+                                <span class="trend-text text-muted" style="font-size: 0.9rem;">This Week</span>
                             </div>
-                            <div class="text-center">
-                                <ul class="list-unstyled top-expenses-list text-start">
-                                    @forelse ($upcomingbillsData as $bill)
-                                        <!-- Entire row is clickable -->
-                                        <li class="d-flex justify-content-between align-items-center border-bottom py-2 px-2 clickable"
-                                            data-bs-toggle="modal" data-bs-target="#billModal{{ $bill->id }}"
-                                            style="cursor: pointer;">
-                                            <div class="text-start flex-grow-1">
-                                                <div class="fw-semibold">{{ $bill->bill_name }}</div>
-                                                <small class="text-muted">
-                                                    Due: {{ \Carbon\Carbon::parse($bill->due_date)->format('M d, Y') }}
-                                                </small>
-                                            </div>
-                                            <div class="fw-semibold text-end me-2">
-                                                ₱{{ number_format($bill->amount, 2) }}
-                                            </div>
-                                        </li>
-                                    @empty
-                                        <li class="text-muted py-2">No upcoming bills</li>
-                                    @endforelse
-                                </ul>
-                            </div>
+                            <p class="trend-description text-muted mb-0">
+                                Spending increased compared to last week
+                            </p>
                         </div>
                     </div>
-                    <!-- Bill Modal -->
-                    @foreach ($upcomingbillsData as $bill)
-                        <div class="modal fade" id="billModal{{ $bill->id }}" tabindex="-1"
-                            aria-labelledby="billModalLabel{{ $bill->id }}" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title fw-semibold " id="billModalLabel{{ $bill->id }}">
-                                            {{ $bill->bill_name }}
-                                        </h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                            aria-label="Close"></button>
-                                    </div>
-                                    <!-- Modal Body -->
-                                    <div class="modal-body">
-                                        <div class="row mb-3 justify-content-center text-center">
-                                            <div class="col">
-                                                <p class="mb-1"><strong>Amount:</strong></p>
-                                                <p>₱{{ number_format($bill->amount, 2) }}</p>
-                                            </div>
-                                            <div class="col">
-                                                <p class="mb-1"><strong>Due Date:</strong></p>
-                                                <p>{{ \Carbon\Carbon::parse($bill->due_date)->format('F j, Y') }}</p>
-                                            </div>
-                                        </div>
-                                        <!-- Description Form -->
-                                        <form action="{{ route('bills.updateDescription', $bill->id) }}" method="POST">
-                                            @csrf
-                                            @method('PUT')
-                                            <div class="mb-3">
-                                                <label for="description{{ $bill->id }}"
-                                                    class="form-label fw-semibold">Description</label>
-                                                <textarea class="form-control" id="description{{ $bill->id }}" name="description" rows="3"
-                                                    placeholder="Add or update description...">{{ $bill->description }}</textarea>
-                                            </div>
-                                            <div class="d-flex justify-content-end mb-2">
-                                                <button type="submit" class="btn btn-primary fw-semibold">Save
-                                                    Description</button>
-                                            </div>
-                                        </form>
-                                    </div>
 
-                                    <div class="modal-footer">
-                                        <div class="d-flex gap-2 justify-content-end">
-                                            <form {{-- action="{{ route('', $bill->id) }}" --}} method="POST">
-                                                @csrf
-                                                <button type="submit" class="btn btn-success fw-semibold">
-                                                    Mark as Paid
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
+
+
                 </div>
 
                 <script>
@@ -544,36 +420,171 @@
 
                     <div class="row">
                         <div class="col-lg-6">
-                            <div class="card border">
+                            {{-- Upcoming Bills --}}
+                            <div class="card border" style="height: 215px;">
                                 <div class="card-body">
                                     <div class="d-flex gap-2 mb-2 align-items-center">
-                                        <i class="fas fa-lightbulb text-muted"></i>
-                                        <h6 class="mb-0 fw-semibold text-dark">Allowance vs Expenses per Month</h6>
+                                        <i class="fas fa-money-bills text-muted"></i>
+                                        <h6 class="mb-0 fw-semibold text-dark">Upcoming Bills</h6>
                                     </div>
-                                    <h1>Mini Chart</h1>
+                                    <div class="text-center">
+                                        <ul class="list-unstyled top-expenses-list text-start">
+                                            @forelse ($upcomingbillsData as $bill)
+                                                <!-- Entire row is clickable -->
+                                                <li class="d-flex justify-content-between align-items-center border-bottom py-2 px-2 clickable"
+                                                    data-bs-toggle="modal" data-bs-target="#billModal{{ $bill->id }}"
+                                                    style="cursor: pointer;">
+                                                    <div class="text-start flex-grow-1">
+                                                        <div class="fw-semibold">{{ $bill->bill_name }}</div>
+                                                        <small class="text-muted">
+                                                            Due:
+                                                            {{ \Carbon\Carbon::parse($bill->due_date)->format('M d, Y') }}
+                                                        </small>
+                                                    </div>
+                                                    <div class="fw-semibold text-end me-2">
+                                                        ₱{{ number_format($bill->amount, 2) }}
+                                                    </div>
+                                                </li>
+                                            @empty
+                                                <li class="text-muted py-2">No upcoming bills</li>
+                                            @endforelse
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-6">
-                            <div class="card border">
-                                <div class="card-body">
-                                    <div class="d-flex gap-2 mb-2 align-items-center">
-                                        <i class="fas fa-lightbulb text-muted"></i>
-                                        <h6 class="mb-0 fw-semibold text-dark">Spending Insights</h6>
-                                    </div>
-                                    <p class="text-muted small">
-                                        Get a quick analysis of your spending habits or other financial data here.
-                                    </p>
+                        <!-- Bill Modal -->
+                        @foreach ($upcomingbillsData as $bill)
+                            <div class="modal fade" id="billModal{{ $bill->id }}" tabindex="-1"
+                                aria-labelledby="billModalLabel{{ $bill->id }}" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title fw-semibold " id="billModalLabel{{ $bill->id }}">
+                                                {{ $bill->bill_name }}
+                                            </h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <!-- Modal Body -->
+                                        <div class="modal-body">
+                                            <div class="row mb-3 justify-content-center text-center">
+                                                <div class="col">
+                                                    <p class="mb-1"><strong>Amount:</strong></p>
+                                                    <p>₱{{ number_format($bill->amount, 2) }}</p>
+                                                </div>
+                                                <div class="col">
+                                                    <p class="mb-1"><strong>Due Date:</strong></p>
+                                                    <p>{{ \Carbon\Carbon::parse($bill->due_date)->format('F j, Y') }}</p>
+                                                </div>
+                                            </div>
+                                            <!-- Description Form -->
+                                            <form action="{{ route('bills.updateDescription', $bill->id) }}"
+                                                method="POST">
+                                                @csrf
+                                                @method('PUT')
+                                                <div class="mb-3">
+                                                    <label for="description{{ $bill->id }}"
+                                                        class="form-label fw-semibold">Description</label>
+                                                    <textarea class="form-control" id="description{{ $bill->id }}" name="description" rows="3"
+                                                        placeholder="Add or update description...">{{ $bill->description }}</textarea>
+                                                </div>
+                                                <div class="d-flex justify-content-end mb-2">
+                                                    <button type="submit" class="btn btn-primary fw-semibold">Save
+                                                        Description</button>
+                                                </div>
+                                            </form>
+                                        </div>
 
-                                    <ul class="mb-0">
-                                        <li>Average daily spending: ₱{{ number_format($avgDailySpend ?? 0, 2) }}</li>
-                                        <li>Most frequent expense category: {{ $topCategory ?? 'N/A' }}</li>
-                                        <li>Predicted savings for next month:
-                                            ₱{{ number_format($predictedSavings ?? 0, 2) }}</li>
-                                    </ul>
+                                        <div class="modal-footer">
+                                            <div class="d-flex gap-2 justify-content-end">
+                                                <form {{-- action="{{ route('', $bill->id) }}" --}} method="POST">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-success fw-semibold">
+                                                        Mark as Paid
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                        <div class="col-lg-6">
+                            {{-- Top Expenses --}}
+                            <div class="card border" style="height: 215px;">
+                                <div class="card-body">
+                                    <div class="d-flex gap-2 mb-2 align-items-center">
+                                        <i class="fas fa-money-bills text-muted"></i>
+                                        <h6 class="mb-0 fw-semibold text-dark">Top Expenses</h6>
+                                    </div>
+
+                                    <div class="text-center">
+                                        <ul class="list-unstyled top-expenses-list text-start ">
+                                            @forelse ($topExpenses as $l_expense)
+                                                @php
+                                                    $categorySlug = Str::slug($l_expense->category->name ?? 'No Name');
+                                                @endphp
+                                                <li class="d-flex justify-content-between align-items-center border-bottom py-2 px-2 clickable"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#ExpensesModal{{ $categorySlug }}"
+                                                    style="cursor: pointer;">
+                                                    <div class="text-start flex-grow-1">
+                                                        <div class="fw-semibold">
+                                                            {{ $l_expense->category->name ?? 'No Name' }}</div>
+                                                    </div>
+                                                    <div class="fw-semibold text-end me-2">
+                                                        ₱{{ number_format($l_expense->total_amount, 2) }}
+                                                    </div>
+                                                </li>
+                                            @empty
+                                                <li class="text-muted py-2">No Expenses Yet</li>
+                                            @endforelse
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
+                        {{-- Modals per Category --}}
+                        @foreach ($expensesName as $categoryName => $transactions)
+                            @php
+                                $categorySlug = Str::slug($categoryName);
+                            @endphp
+                            <div class="modal fade" id="ExpensesModal{{ $categorySlug }}" tabindex="-1"
+                                aria-labelledby="ExpensesModalLabel{{ $categorySlug }}" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title fw-semibold"
+                                                id="ExpensesModalLabel{{ $categorySlug }}">
+                                                {{ $categoryName }}
+                                            </h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <ul class="list-group list-group-flush">
+                                                @foreach ($transactions as $expense)
+                                                    <li
+                                                        class="list-group-item d-flex justify-content-between align-items-center py-2">
+                                                        <div class="text-muted" style="width: 120px;">
+                                                            {{ \Carbon\Carbon::parse($expense->transaction_date)->format('Y-m-d') }}
+                                                        </div>
+                                                        <div class="flex-grow-1 px-2">
+                                                            {{ $expense->note }}
+                                                        </div>
+                                                        <div class="fw-semibold text-end" style="width: 80px;">
+                                                            ₱{{ number_format($expense->amount, 2) }}
+                                                        </div>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
             </div>
