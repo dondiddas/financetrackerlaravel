@@ -43,6 +43,27 @@ class UpcomingBillsController extends Controller
     return redirect()->back()->with('success', 'Description updated successfully!');
 }
 
+public function store(Request $request)
+{
+    $request->validate([
+        'bill_name' => 'required|string|max:255',
+        'amount' => 'required|numeric|min:0',
+        'due_date' => 'required|date',
+        'description' => 'nullable|string|max:500',
+    ]);
+
+    Bills::create([
+        'user_id' => auth()->id() ?? 1,
+        'bill_name' => $request->bill_name,
+        'amount' => $request->amount,
+        'due_date' => $request->due_date,
+        'description' => $request->description,
+    ]);
+
+    return redirect()->back()->with('success', 'Bill added successfully!');
+}
+
+
 
 }
 

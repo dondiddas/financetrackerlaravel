@@ -23,5 +23,6 @@ Route::post('/allowance/add-allowance',[AllowanceController::class,'addAllowance
 
 Route::get('/bills/{id}', [UpcomingBillsController::class, 'getBill'])->name('bills.get');
 Route::put('/bills/{id}/description', [UpcomingBillsController::class, 'updateDescription'])->name('bills.updateDescription');
+Route::post('/upcoming-bills/store', [UpcomingBillsController::class, 'store'])->name('upcoming-bills.store');
 
 

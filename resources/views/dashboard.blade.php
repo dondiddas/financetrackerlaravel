@@ -65,29 +65,29 @@
                     </div>
 
                     <div class="card border shadow-sm">
-    <div class="card-body">
-        <div class="d-flex gap-2 align-items-center mb-1">
-            <i class="fas fa-fire text-muted"></i>
-            <h6 class="mb-0 fw-semibold text-dark">Burn Rate</h6>
-        </div>
+                        <div class="card-body">
+                            <div class="d-flex gap-2 align-items-center mb-1">
+                                <i class="fas fa-fire text-muted"></i>
+                                <h6 class="mb-0 fw-semibold text-dark">Burn Rate</h6>
+                            </div>
 
-        <div class="text-center">
-            <h1 class="fw-semibold mb-1 fs-2 fs-md-1">
-                ₱{{ number_format($burnRate['daily'], 2) }}
-            </h1>
-            <p class="text-muted small mb-1">per day on average</p>
+                            <div class="text-center">
+                                <h1 class="fw-semibold mb-1 fs-2 fs-md-1">
+                                    ₱{{ number_format($burnRate['daily'], 2) }}
+                                </h1>
+                                <p class="text-muted small mb-1">per day on average</p>
 
-            <div class="mt-2">
-                <span class="badge bg-light text-dark">
-                    Weekly: ₱{{ number_format($burnRate['weekly'], 2) }}
-                </span>
-                <span class="badge bg-light text-dark mt-1">
-                    Monthly: ₱{{ number_format($burnRate['monthly'], 2) }}
-                </span>
-            </div>
-        </div>
-    </div>
-</div>
+                                <div class="mt-2">
+                                    <span class="badge bg-light text-dark">
+                                        Weekly: ₱{{ number_format($burnRate['weekly'], 2) }}
+                                    </span>
+                                    <span class="badge bg-light text-dark mt-1">
+                                        Monthly: ₱{{ number_format($burnRate['monthly'], 2) }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
 
 
@@ -441,49 +441,102 @@
                         <div class="col-lg-6">
                             {{-- Upcoming Bills --}}
                             <div class="card border" style="height: 215px;">
-    <div class="card-body">
+                                <div class="card-body">
 
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <div class="d-flex gap-2 align-items-center">
-                <i class="fas fa-money-bills text-muted"></i>
-                <h6 class="mb-0 fw-semibold text-dark">Upcoming Bills</h6>
-            </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div class="d-flex gap-2 align-items-center">
+                                            <i class="fas fa-money-bills text-muted"></i>
+                                            <h6 class="mb-0 fw-semibold text-dark">Upcoming Bills</h6>
+                                        </div>
 
-            <!-- Add New Bill Button -->
-            <button class="btn btn-sm btn-primary"
-                data-bs-toggle="modal"
-                data-bs-target="#addBillModal">
-                <i class="fas fa-plus"></i>
-            </button>
-        </div>
+                                        <!-- Add New Bill Button -->
+                                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                                            data-bs-target="#addBillModal">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
 
-        <div class="text-center">
-            <ul class="list-unstyled top-expenses-list text-start">
-                @forelse ($upcomingbillsData as $bill)
-                    <li class="d-flex justify-content-between align-items-center border-bottom py-2 px-2 clickable"
-                        data-bs-toggle="modal"
-                        data-bs-target="#billModal{{ $bill->id }}"
-                        style="cursor: pointer;">
-                        <div class="text-start flex-grow-1">
-                            <div class="fw-semibold">{{ $bill->bill_name }}</div>
-                            <small class="text-muted">
-                                Due: {{ \Carbon\Carbon::parse($bill->due_date)->format('M d, Y') }}
-                            </small>
-                        </div>
-                        <div class="fw-semibold text-end me-2">
-                            ₱{{ number_format($bill->amount, 2) }}
-                        </div>
-                    </li>
-                @empty
-                    <li class="text-muted py-2">No upcoming bills</li>
-                @endforelse
-            </ul>
-        </div>
-
-    </div>
-</div>
+                                    <div class="text-center">
+                                        <ul class="list-unstyled top-expenses-list text-start">
+                                            @forelse ($upcomingbillsData as $bill)
+                                                <li class="d-flex justify-content-between align-items-center border-bottom py-2 px-2 clickable"
+                                                    data-bs-toggle="modal" data-bs-target="#billModal{{ $bill->id }}"
+                                                    style="cursor: pointer;">
+                                                    <div class="text-start flex-grow-1">
+                                                        <div class="fw-semibold">{{ $bill->bill_name }}</div>
+                                                        <small class="text-muted">
+                                                            Due:
+                                                            {{ \Carbon\Carbon::parse($bill->due_date)->format('M d, Y') }}
+                                                        </small>
+                                                    </div>
+                                                    <div class="fw-semibold text-end me-2">
+                                                        ₱{{ number_format($bill->amount, 2) }}
+                                                    </div>
+                                                </li>
+                                            @empty
+                                                <li class="text-muted py-2">No upcoming bills</li>
+                                            @endforelse
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
 
                         </div>
+                        <!-- Add Bill Modal -->
+                        <div class="modal fade" id="addBillModal" tabindex="-1" aria-labelledby="addBillModalLabel"
+                            aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+
+                                    <div class="modal-header">
+                                        <h5 class="modal-title fw-semibold" id="addBillModalLabel">Add New Bill</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+
+                                    <form action="{{ route('upcoming-bills.store') }}" method="POST">
+                                        @csrf
+
+                                        <div class="modal-body">
+
+                                            <!-- Bill Name -->
+                                            <div class="mb-3">
+                                                <label class="form-label fw-semibold">Bill Name</label>
+                                                <input type="text" class="form-control" name="bill_name" required>
+                                            </div>
+
+                                            <!-- Amount -->
+                                            <div class="mb-3">
+                                                <label class="form-label fw-semibold">Amount</label>
+                                                <input type="number" step="0.01" class="form-control" name="amount"
+                                                    required>
+                                            </div>
+
+                                            <!-- Due Date -->
+                                            <div class="mb-3">
+                                                <label class="form-label fw-semibold">Due Date</label>
+                                                <input type="date" class="form-control" name="due_date" required>
+                                            </div>
+
+                                            <!-- Description -->
+                                            <div class="mb-3">
+                                                <label class="form-label fw-semibold">Description (optional)</label>
+                                                <textarea class="form-control" name="description" rows="3"></textarea>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-light"
+                                                data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-primary">Save Bill</button>
+                                        </div>
+
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Bill Modal -->
                         @foreach ($upcomingbillsData as $bill)
                             <div class="modal fade" id="billModal{{ $bill->id }}" tabindex="-1"
