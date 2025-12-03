@@ -4,25 +4,119 @@
 
 
     <div class="position-relative ">
-
         <div class="col">
-            <h4 class="fw-semibold mb-0 fs-2 fs-md-1 pe-5">
-                {{ $greeting }}, {{ $userName }}!
-            </h4>
-            <p class="text-muted mb-2 medium">{{ now()->format('l, F j, Y') }}</p>
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <h4 class="fw-semibold mb-0 fs-2 fs-md-1 pe-5">
+                        {{ $greeting }}, {{ $userName }}!
+                    </h4>
+                    <p class="text-muted mb-0 medium">{{ now()->format('l, F j, Y') }}</p>
+                </div>
+                <div class="col d-flex justify-content-end">
+
+                    <div class="dropdown me-2">
+                        <button class="btn p-0 border-0 bg transaparent d-flex align-items-center" id="notifMenu"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <span
+                                class="rounded-circle bg-light border d-inline-flex align-items-center justify-content-center"
+                                style="width:50px;height:50px;">
+                                <i class="fa-solid fa-bell" style="font-size:18px;color:#6c757d"></i>
+                            </span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notifMenu" style="width:260px;">
+                            <li class="dropdown-header fw-bold">Notifications</li>
+
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+
+                            <!-- Empty state -->
+                            <li class="text-center text-muted small py-2">No notifications</li>
+                        </ul>
+                    </div>
+                    <div class="dropdown">
+                        @php
+                            $userEmail = auth()->user()->email ?? null;
+                        @endphp
+
+                        <button class="btn p-0 border-0 bg-transparent d-flex align-items-center" id="userMenu"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+
+                            <span
+                                class="rounded-circle bg-light border d-inline-flex align-items-center justify-content-center me-2"
+                                style="width:50px;height:50px;">
+                                <i class="fa-solid fa-user" style="font-size:18px;color:#6c757d"></i>
+                            </span>
+
+                        </button>
+
+
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                    data-bs-target="#profileModal">Profile</a></li>
+                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                    data-bs-target="#settingsModal">Settings</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="m-0">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item">Logout</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="mt-2">
             <div class="row">
                 <div class="col-lg-3 col-6 mb-3 d-flex flex-column">
                     <!-- Allowance Overview -->
-                    <div class="card border mb-3" data-bs-toggle="modal" data-bs-target="#allowanceovermodal"
-                        style="cursor: pointer;">
+                    <div class="card border mb-3" style="cursor: pointer;" onclick="openAllowanceModal(event)"
+                        data-allowance="{{ number_format($AllowanceData, 2) }}"
+                        data-last-allowance="{{ number_format($LastAllowanceData, 2) }}"
+                        data-income="{{ number_format($IncomeData, 2) }}"
+                        data-last-income="{{ number_format($LastIncomeData, 2) }}"
+                        data-all="{{ number_format($AllData ?? $AllowanceData + $IncomeData, 2) }}"
+                        data-last-all="{{ number_format($LastAllData ?? $LastAllowanceData + $LastIncomeData, 2) }}">
                         <div class="card-body kpi-allowance">
-                            <div class="d-flex gap-2 mb-2 align-items-center">
-                                <i class="fas fa-piggy-bank text-muted"></i>
-                                <h6 class="mb-0 fw-semibold text-dark">Allowance Overview</h6>
+                            <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap">
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <i class="fas fa-piggy-bank text-muted"></i>
+                                    <div class="dropdown" onclick="event.stopPropagation();">
+                                        <button
+                                            class="dropdown-toggle border-0 bg-transparent shadow-none 
+                                   mb-0 fw-semibold text-dark p-0"
+                                            type="button" id="kpiDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                            Allowance Overview
+                                        </button>
+
+                                        <ul class="dropdown-menu" aria-labelledby="kpiDropdown">
+                                            <li>
+                                                <a class="dropdown-item active" href="#"
+                                                    onclick="selectKPI(event, 'allowance', this)">
+                                                    Allowance Overview
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="#"
+                                                    onclick="selectKPI(event, 'income', this)">
+                                                    Income Overview
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="#"
+                                                    onclick="selectKPI(event, 'all', this)">
+                                                    All Overview
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="text-center">
+                            <div class="text-center" id="kpi-display">
                                 <h1 class="fw-semibold mb-0 fs-2 fs-md-1">
                                     ₱{{ number_format($AllowanceData, 2) }}
                                 </h1>
@@ -32,15 +126,41 @@
                             </div>
                         </div>
                     </div>
+
+                    <style>
+                        /* Reduce KPI dropdown font so longer labels fit */
+                        .kpi-allowance .dropdown-toggle {
+                            font-size: 0.78rem;
+                            line-height: 1;
+                            padding: 0;
+                            /* allow a slightly wider button but keep it compact */
+                            max-width: 160px;
+                            display: inline-block;
+                            white-space: normal;
+                        }
+
+                        .kpi-allowance .dropdown-menu .dropdown-item {
+                            font-size: 0.78rem;
+                            white-space: normal;
+                            /* allow the label to wrap if needed */
+                            padding-top: .35rem;
+                            padding-bottom: .35rem;
+                        }
+                    </style>
+
+
                     {{-- Cash Balance --}}
                     <div class="card border no-hover">
-                        <div class="card-body kpi-highlight">
+                        <div id="cashBalanceCard" class="card-body kpi-highlight"
+                            data-cash-allowance="{{ number_format($cashBalanceAllowance, 2) }}"
+                            data-cash-income="{{ number_format($cashBalanceIncome, 2) }}"
+                            data-cash-all="{{ number_format($cashBalanceAll, 2) }}">
                             <div class="d-flex gap-2 mb-1 align-items-center">
                                 <i class="fas fa-money-bills text-muted"></i>
                                 <h6 class="mb-0 fw-semibold text-dark">Cash Balance</h6>
                             </div>
                             <div class="text-center">
-                                <h1 class="fw-semibold mb-0 fs-2 fs-md-1">
+                                <h1 id="cashBalanceValue" class="fw-semibold mb-0 fs-2 fs-md-1">
                                     ₱{{ number_format($cashBalance, 2) }}
                                 </h1>
                                 <div class="my-4"></div>
@@ -122,6 +242,8 @@
                                     </script>
                                 @endif
 
+                                <script src="{{ asset('js/allowance-income.js') }}"></script>
+
                                 {{-- Add Allowance / Income Form --}}
                                 <form action="{{ route('allowance.addallowance') }}" method="POST">
                                     @csrf
@@ -191,8 +313,8 @@
                                 <h6 class="mb-0 fw-semibold text-dark">Daily Expenses</h6>
                             </div>
                             <div class="text-center">
-                                <h1 class="fw-semibold mb-0 fs-2 fs-md-1">
-                                    {{ number_format($dailyExpensesData, 2) }}
+                                <h1 id="dailyExpensesCardValue" class="fw-semibold mb-0 fs-2 fs-md-1">
+                                    ₱{{ number_format($dailyExpensesData, 2) }}
                                 </h1>
                                 <p class="text-secondary mt-1 mb-0 small border" data-bs-toggle="modal"
                                     data-bs-target="#dailyLimitModal" style="cursor: pointer;"
@@ -259,25 +381,37 @@
 
                                             <!-- Scrollable -->
                                             <div style="max-height: 220px; overflow-y: auto;">
-                                                <ul class="list-unstyled mt-2">
-                                                    @forelse ($dailyExpensesBreakdown->take(50) as $expense)
-                                                        <li class="mb-1">
-                                                            {{ $expense->category->name ?? 'No Category' }}
-                                                            @if (!empty($expense->note))
-                                                                — <small class="text-muted">{{ $expense->note }}</small>
-                                                            @endif
-                                                            <span
-                                                                class="float-end">₱{{ number_format($expense->amount, 2) }}</span>
-                                                        </li>
-                                                    @empty
-                                                        <li class="text-muted">No expenses recorded today</li>
-                                                    @endforelse
-                                                </ul>
+                                                <table class="table table-sm mb-0">
+                                                    <tbody id="dailyExpensesList">
+                                                        @forelse ($dailyExpensesBreakdown->take(50) as $expense)
+                                                            <tr>
+                                                                <td class="">
+                                                                    {{ \Carbon\Carbon::parse($expense->transaction_date)->format('F j, Y') }}
+                                                                </td>
+                                                                <td>
+                                                                    {{ $expense->category->name ?? 'No Category' }}
+                                                                    @if (!empty($expense->note))
+                                                                        <div class="small text-muted">{{ $expense->note }}
+                                                                        </div>
+                                                                    @endif
+                                                                </td>
+                                                                <td class="fw-semibold text-end">
+                                                                    ₱{{ number_format($expense->amount, 2) }}</td>
+                                                            </tr>
+                                                        @empty
+                                                            <tr class="no-expenses">
+                                                                <td colspan="3" class="text-muted">No expenses recorded
+                                                                    today</td>
+                                                            </tr>
+                                                        @endforelse
+                                                    </tbody>
+                                                </table>
                                             </div>
 
                                             <div class="mt-3 border-top pt-2 mb-3 d-flex justify-content-between">
                                                 <strong>Total Today:</strong>
-                                                <strong>₱{{ number_format($dailyExpensesData, 2) }}</strong>
+                                                <strong
+                                                    id="dailyTotal">₱{{ number_format($dailyExpensesData, 2) }}</strong>
                                             </div>
 
 
@@ -304,7 +438,8 @@
 
                                             <h6 class="fw-semibold mb-2">Add New Expense</h6>
 
-                                            <form action="{{ route('expenses.addDaily') }}" method="POST">
+                                            <form id="dailyExpensesForm" action="{{ route('expenses.addDaily') }}"
+                                                method="POST">
                                                 @csrf
 
                                                 <div class="mb-2">
@@ -349,40 +484,44 @@
                         </div>
                     </div>
 
-                    {{-- Goals --}}
-                    <div class="card border no-hover">
-                        <div class="card-body kpi-highlight">
-                            <div class="d-flex gap-2 mb-1 align-items-center">
-                                <i class="fas fa-money-bills text-muted"></i>
-                                <h6 class="mb-0 fw-semibold text-dark">Goals</h6>
-                            </div>
-                            <div class="text-center">
-                                <h1 class="fw-semibold mb-0 fs-2 fs-md-1">
-                                    ₱{{ number_format($cashBalance, 2) }}
-                                </h1>
-                                <div class="my-4"></div>
-                            </div>
-                        </div>
-                    </div>
+                    {{-- recent activity --}}
                     <div class="card border no-hover">
                         <div class="card-body">
-                            <!-- Icon + Title -->
-                            <div class="d-flex gap-2 mb-1 align-items-center">
-                                <span
-                                    class="trend-icon {{ $ExpensesPercentage['trend'] == 'up' ? 'text-danger' : 'text-success' }}">
-                                    <i class="fa-solid fa-arrow-{{ $ExpensesPercentage['trend'] }}"></i>
-                                </span>
-                                <h6 class="mb-0 fw-semibold text-dark">Expense Trends</h6>
+                            <div class="d-flex gap-2 mb-2 align-items-center">
+                                <h6 class="mb-0 fw-semibold text-dark">Recent Activity</h6>
                             </div>
-                            <div class="text-center">
-                                <h1 class="fw-semibold mb-0 fs-2 fs-md-1">
-                                    {{ $ExpensesPercentage['percentage_change'] }}%
-                                </h1>
-                                <p class="text-muted mb-0 mt-1">
-                                    Spending {{ $ExpensesPercentage['trend'] == 'up' ? 'increased' : 'decreased' }}
-                                    compared to last week
-                                </p>
-                            </div>
+
+                            @if ($recentTransactions->isEmpty())
+                                <div id="recentActivityContainer"
+                                    class="d-flex justify-content-center align-items-center text-muted"
+                                    style="height: 250px;">
+                                    No recent activity
+                                </div>
+                            @else
+                                <div id="recentActivityContainer"
+                                    style="min-height: 250px; max-height: 250px; overflow-y: auto;">
+                                    @foreach ($recentTransactions as $date => $transactions)
+                                        <div class="small text-muted mt-2">{{ $date }}</div>
+                                        <ul class="list-unstyled mb-2">
+                                            @foreach ($transactions as $t)
+                                                <li
+                                                    class="d-flex justify-content-between align-items-center border-bottom py-2 px-2">
+                                                    <div class="flex-grow-1">
+                                                        <div class="fw-semibold">{{ $t->category->name ?? 'No Category' }}
+                                                            <small
+                                                                class="text-muted">{{ $t->category->type ?? '' }}</small>
+                                                        </div>
+                                                        <div class="small text-muted">{{ $t->note }}</div>
+                                                    </div>
+                                                    <div class="fw-semibold text-end">₱{{ number_format($t->amount, 2) }}
+                                                    </div>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    @endforeach
+                                </div>
+                            @endif
+
                         </div>
                     </div>
 
@@ -409,6 +548,9 @@
                         month: @json($MonthlyLimitChart)
                     };
                 </script>
+
+                <script src="{{ asset('js/daily-expenses.js') }}"></script>
+                <script src="{{ asset('js/recent-transactions.js') }}"></script>
 
                 <div class="col-lg-6 d-flex flex-column">
                     <!-- Chart Card -->
@@ -463,7 +605,11 @@
                                                     data-bs-toggle="modal" data-bs-target="#billModal{{ $bill->id }}"
                                                     style="cursor: pointer;">
                                                     <div class="text-start flex-grow-1">
-                                                        <div class="fw-semibold">{{ $bill->bill_name }}</div>
+                                                        <div class="fw-semibold">{{ $bill->bill_name }} @if (!empty($bill->is_recurring))
+                                                                <span
+                                                                    class="badge bg-info text-dark ms-1 small">Recurring</span>
+                                                            @endif
+                                                        </div>
                                                         <small class="text-muted">
                                                             Due:
                                                             {{ \Carbon\Carbon::parse($bill->due_date)->format('M d, Y') }}
@@ -522,6 +668,31 @@
                                             <div class="mb-3">
                                                 <label class="form-label fw-semibold">Description (optional)</label>
                                                 <textarea class="form-control" name="description" rows="3"></textarea>
+                                            </div>
+
+                                            <!-- Recurring checkbox -->
+                                            <div class="form-check mb-3">
+                                                <input class="form-check-input" type="checkbox" value="1"
+                                                    id="is_recurring" name="is_recurring"
+                                                    {{ old('is_recurring', true) ? 'checked' : '' }}>
+                                                <label class="form-check-label small" for="is_recurring">
+                                                    Recurring bill
+                                                </label>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label small">Recurrence</label>
+                                                <select name="recurrence_interval" class="form-select">
+                                                    <option value="monthly"
+                                                        {{ old('recurrence_interval') == 'monthly' ? 'selected' : '' }}>
+                                                        Monthly</option>
+                                                    <option value="weekly"
+                                                        {{ old('recurrence_interval') == 'weekly' ? 'selected' : '' }}>
+                                                        Weekly</option>
+                                                    <option value="yearly"
+                                                        {{ old('recurrence_interval') == 'yearly' ? 'selected' : '' }}>
+                                                        Yearly</option>
+                                                </select>
                                             </div>
 
                                         </div>
@@ -674,6 +845,186 @@
             </div>
         </div>
     </div>
+    <!-- Profile and Settings Modals -->
+    <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-semibold" id="profileModalLabel">Edit Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <form action="{{ route('profile.update') }}" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-body">
+                        @if (session('profile_success'))
+                            <div class="alert alert-success small">{{ session('profile_success') }}</div>
+                        @endif
+
+                        <div class="row">
+                            <div class="">
+                                @php
+                                    $email = auth()->user()->email ?? '';
+                                @endphp
+
+                                <div class="d-flex align-items-start mb-3">
+                                    <div class="flex-grow-1">
+                                        <div class="row gx-5">
+                                            <div class="col-md-4 ">
+                                                <span id="profilePreview"
+                                                    class="rounded-circle bg-light border d-inline-flex align-items-center justify-content-center me-3"
+                                                    style="width:100px;height:100px;">
+                                                    <i class="fa-solid fa-user fa-2x text-muted"></i>
+                                                </span>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label small">Profile photo</label>
+                                                <input type="file" name="avatar" id="profileAvatarInput"
+                                                    accept="image/*" class="form-control form-control-sm">
+                                                <small class="text-muted">Optional. JPG/PNG, max 2MB.</small>
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-2">
+                                            <div class="col-md-4">
+                                                <label class="form-label small">First name</label>
+                                                <input type="text" name="first_name" class="form-control"
+                                                    placeholder="{{ auth()->user()->first_name ?? 'Enter first name' }}">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label small">Middle name</label>
+                                                <input type="text" name="middle_name" class="form-control"
+                                                    value="{{ auth()->user()->middle_name ?? '' }}">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label small">Last name</label>
+                                                <input type="text" name="last_name" class="form-control"
+                                                    value="{{ auth()->user()->last_name ?? '' }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <script>
+                                    (function() {
+                                        const input = document.getElementById('profileAvatarInput');
+                                        const previewEl = document.getElementById('profilePreview');
+                                        if (!input || !previewEl) return;
+
+                                        function showImageDataURL(dataUrl) {
+                                            if (previewEl.tagName.toLowerCase() === 'img') {
+                                                previewEl.src = dataUrl;
+                                            } else {
+                                                previewEl.innerHTML = '';
+                                                const img = document.createElement('img');
+                                                img.src = dataUrl;
+                                                img.style.width = previewEl.style.width || '100px';
+                                                img.style.height = previewEl.style.height || '100px';
+                                                img.style.objectFit = 'cover';
+                                                img.className = 'rounded-circle border';
+                                                previewEl.appendChild(img);
+                                            }
+                                        }
+
+                                        function restorePlaceholder() {
+                                            const email = '{{ auth()->user()->email ?? '' }}';
+                                            if (!email) {
+                                                if (previewEl.tagName.toLowerCase() === 'img') {
+                                                    const span = document.createElement('span');
+                                                    span.id = 'profilePreview';
+                                                    span.className =
+                                                        'rounded-circle bg-light border d-inline-flex align-items-center justify-content-center';
+                                                    span.style.width = previewEl.style.width || '100px';
+                                                    span.style.height = previewEl.style.height || '100px';
+                                                    span.innerHTML = '<i class="fa-solid fa-user fa-2x text-muted"></i>';
+                                                    previewEl.replaceWith(span);
+                                                } else {
+                                                    previewEl.innerHTML = '<i class="fa-solid fa-user fa-2x text-muted"></i>';
+                                                }
+                                            } else {
+                                                const grav = 'https://www.gravatar.com/avatar/' + md5(email.trim().toLowerCase()) +
+                                                    '?s=160&d=identicon';
+                                                // We don't have md5 in JS here; instead compute in template below if email exists.
+                                            }
+                                        }
+
+                                        // If user selects a file, preview it
+                                        input.addEventListener('change', e => {
+                                            const file = e.target.files && e.target.files[0];
+                                            if (!file) {
+                                                restorePlaceholder();
+                                                return;
+                                            }
+
+                                            const reader = new FileReader();
+                                            reader.onload = ev => showImageDataURL(ev.target.result);
+                                            reader.readAsDataURL(file);
+                                        });
+                                    })();
+                                </script>
+                            </div>
+
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label small">Email</label>
+                            <input type="email" name="email" class="form-control" required
+                                value="{{ auth()->user()->email ?? '' }}">
+                        </div>
+
+                        <hr>
+                        <div class="mb-2 small text-muted">Change password (leave blank to keep current)</div>
+                        <div class="mb-2">
+                            <label class="form-label small">New password</label>
+                            <input type="password" name="password" class="form-control" autocomplete="new-password">
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label small">Confirm password</label>
+                            <input type="password" name="password_confirmation" class="form-control"
+                                autocomplete="new-password">
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-semibold" id="settingsModalLabel">Settings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small text-muted">Account settings and preferences.</p>
+                    <form>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" value="1" id="emailNotifications"
+                                checked>
+                            <label class="form-check-label small" for="emailNotifications">Email notifications</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" value="1" id="weeklySummary">
+                            <label class="form-check-label small" for="weeklySummary">Weekly summary</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- success notification for daily expenses and allowance Overview --}}
     @if (session('open_modal'))
         <script>

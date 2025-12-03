@@ -35,7 +35,7 @@
 
 /* Sidebar base */
 #sidebar {
-    width: 70px;
+    width: 60px;
     position: fixed;
     top: 0;
     left: 0;
@@ -46,6 +46,10 @@
     overflow-x: hidden;
     padding-top: 70px;
 }
+#sidebar .sidebar-nav li {
+    margin-bottom: 12px;
+}
+
 
 /* Desktop expand on hover */
 @media (min-width: 768px) {
@@ -116,7 +120,7 @@
     border-top: 1px solid rgba(255,255,255,0.2);
     z-index: 3000;
     background: #111;
-    transition: transform 0.25s ease-in-out; /* 🔥 Added for smooth hide/show */
+    transition: transform 0.25s ease-in-out;
 }
 
 /* Nav item */
@@ -149,14 +153,26 @@
                 <i class="fa-solid fa-gauge"></i> <span class="link-text">Dashboard</span>
             </a>
         </li>
-
-        <li><a href="#" class="d-flex align-items-center gap-4 py-2"><i class="fa-solid fa-bolt"></i> <span class="link-text">Shortcut</span></a></li>
-        <li><a href="#" class="d-flex align-items-center gap-4 py-2"><i class="fa-solid fa-cloud-arrow-down"></i> <span class="link-text">Overview</span></a></li>
-        <li><a href="#" class="d-flex align-items-center gap-4 py-2"><i class="fa-solid fa-calendar"></i> <span class="link-text">Events</span></a></li>
-        <li><a href="#" class="d-flex align-items-center gap-4 py-2"><i class="fa-brands fa-youtube"></i> <span class="link-text">About</span></a></li>
-        <li><a href="#" class="d-flex align-items-center gap-4 py-2"><i class="fa-solid fa-wrench"></i> <span class="link-text">Services</span></a></li>
-        <li><a href="#" class="d-flex align-items-center gap-4 py-2"><i class="fa-solid fa-server"></i> <span class="link-text">Contact</span></a></li>
-    </ul>
+        <li class="{{ request()->routeIs('bills.index') ? 'active' : '' }}">
+            <a href="{{ route('bills.index') }}" class="d-flex align-items-center gap-4 px-3 py-2">
+                <i class="fa-solid fa-file-invoice-dollar"></i> <span class="link-text">Bills & Subscriptions</span>
+            </a>
+        </li>
+        <li class="{{ request()->routeIs('transactions.index') ? 'active' : '' }}">
+            <a href="{{ route('transactions.index') }}" class="d-flex align-items-center gap-4 px-3 py-2">
+                <i class="fa-solid fa-wallet"></i> <span class="link-text">Transactions</span>
+            </a>
+        </li>
+        <li class="{{ request()->routeIs('budgets.index') ? 'active' : '' }}">
+            <a href="{{ route('budgets.index') }}" class="d-flex align-items-center gap-4 px-3 py-2">
+                <i class="fa-solid fa-piggy-bank"></i> <span class="link-text">Budgets</span>
+            </a>
+        </li>
+        <li class="{{ request()->routeIs('reports.index') ? 'active' : '' }}">
+            <a href="{{ route('reports.index') }}" class="d-flex align-items-center gap-4 px-3 py-2">
+                <i class="fa-solid fa-chart-line"></i> <span class="link-text">Reports</span>
+            </a>
+        </li>
 </div>
 
 <!-- Mobile Bottom Navbar -->
@@ -166,23 +182,23 @@
         <span>Dashboard</span>
     </a>
     
-    <a href="#" class="nav-item">
-        <i class="fa-solid fa-bolt"></i>
-        <span>Shortcut</span>
+    <a href="{{ route('bills.index') }}" class="nav-item {{ request()->routeIs('bills.index') ? 'active' : '' }}">
+        <i class="fa-solid fa-file-invoice-dollar"></i>
+        <span>Bills & Subscriptions</span>
     </a>
 
-    <a href="#" class="nav-item">
-        <i class="fa-solid fa-cloud-arrow-down"></i>
-        <span>Overview</span>
+<a href="{{ route('transactions.index') }}" class="nav-item {{ request()->routeIs('transactions.index') ? 'active' : '' }}">
+        <i class="fa-solid fa-wallet"></i>
+        <span>Transactions</span>
     </a>
 
-    <a href="#" class="nav-item">
-        <i class="fa-solid fa-calendar"></i>
-        <span>Events</span>
-    </a>
+<a href="{{ route('budgets.index') }}" class="nav-item {{ request()->routeIs('budget.index') ? 'active' : '' }}">
+        <i class="fa-solid fa-piggy-bank"></i>
+        <span>Budget</span>
+</a>
 
-    <a href="#" class="nav-item">
-        <i class="fa-solid fa-server"></i>
-        <span>Contact</span>
-    </a>
+<a href="{{ route('reports.index') }}" class="nav-item {{ request()->routeIs('reports.index') ? 'active' : '' }}">
+        <i class="fa-solid fa-chart-line"></i>
+        <span>Reports</span>
+</a>
 </nav>

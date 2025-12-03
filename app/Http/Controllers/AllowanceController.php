@@ -31,6 +31,29 @@ class AllowanceController extends Controller
             ->sum('amount');
     }
 
+    public function getIncomeOverview($userid)
+{
+    return Transaction::where('user_id', $userid)
+        ->whereHas('category', function($query) {
+            $query->where('type','income');
+        })
+        ->whereMonth('transaction_date', now()->month)
+        ->whereYear('transaction_date', now()->year)
+        ->sum('amount');
+}
+
+public function getLastMonthIncome($userid)
+{
+    $lastMonth = now()->subMonth();
+    return Transaction::where('user_id', $userid)
+        ->whereHas('category', function($query) {
+            $query->where('type','income');
+        })
+        ->whereMonth('transaction_date', $lastMonth->month)
+        ->whereYear('transaction_date', $lastMonth->year)
+        ->sum('amount');
+}
+
     public function addAllowances(Request $request)
 {
     $request->validate([
@@ -53,6 +76,16 @@ class AllowanceController extends Controller
         'note' => $request->note ?? "Added {$request->type}",
         'transaction_date' => now(),
     ]);
+    if ($request->ajax() || $request->wantsJson()) {
+        return response()->json([
+            'success' => true,
+            'message' => ucfirst($request->type) . ' added successfully!',
+            'type' => $request->type,
+            'amount' => $request->amount,
+            'note' => $request->note ?? "Added {$request->type}",
+            'transaction_date' => now()->format('F j, Y'),
+        ]);
+    }
 
     return redirect()->back()->with([
         'allowance_success' => ucfirst($request->type) . ' added successfully!',

@@ -5,6 +5,7 @@ use Carbon\Carbon;
 use App\Models\Transaction;
 use App\Models\Categories;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ExpensesController extends Controller
 {
@@ -42,6 +43,59 @@ public function getDailyExpenseBreakdown($userId)
         ->get();
 }
 
+    /**
+     * Show list of transactions with filters, pagination and ability to add income/expenses.
+     */
+    public function index(Request $request)
+    {
+        $userId = auth()->id() ?? 1;
+
+        $query = Transaction::with('category')
+            ->where('user_id', $userId)
+            ->orderByDesc('transaction_date')
+            ->orderByDesc('created_at');
+
+        // Filter by type (income/expense/all)
+        if ($request->filled('type') && in_array($request->type, ['income','expense','allowance'])) {
+            $type = $request->type;
+            $query->whereHas('category', function($q) use ($type) {
+                $q->where('type', $type);
+            });
+        }
+
+        // Filter by category id
+        if ($request->filled('category')) {
+            $query->where('category_id', $request->category);
+        }
+
+        // Date range filters (from / to)
+        if ($request->filled('from')) {
+            $query->whereDate('transaction_date', '>=', $request->from);
+        }
+        if ($request->filled('to')) {
+            $query->whereDate('transaction_date', '<=', $request->to);
+        }
+
+        // Search q in note or category name
+        if ($request->filled('q')) {
+            $q = $request->q;
+            $query->where(function($sub) use ($q) {
+                $sub->where('note', 'like', "%{$q}%")
+                    ->orWhereHas('category', function($cq) use ($q) {
+                        $cq->where('name', 'like', "%{$q}%");
+                    });
+            });
+        }
+
+        $perPage = (int) $request->input('per', 10);
+        $transactions = $query->paginate($perPage)->withQueryString();
+
+        // categories for filter dropdown
+        $categories = Categories::where('user_id', $userId)->orderBy('name')->get();
+
+        return view('transactions.index', compact('transactions','categories'));
+    }
+
 
     public function addDaily(Request $request)
 {
@@ -66,10 +120,31 @@ public function getDailyExpenseBreakdown($userId)
         'user_id' => auth()->id() ?? 1, // if you have auth
     ]);
 
+    // If this is an AJAX request, return JSON so the frontend can update without full reload
+    if ($request->ajax() || $request->wantsJson()) {
+        $userId = auth()->id() ?? 1;
+        $dailyTotal = $this->getDailyExpenses($userId);
+
+        // We will return some basic info about the created expense to update the UI
+        return response()->json([
+            'success' => true,
+            'message' => 'Expense added successfully!',
+            'expense' => [
+                'amount' => $request->amount,
+                'note' => $request->note,
+                'category_name' => $category->name,
+                'transaction_date' => now()->format('F j, Y'),
+            ],
+            'totals' => [
+                'daily' => $dailyTotal,
+            ],
+        ]);
+    }
+
     return redirect()->back()->with([
-    'expense_success' => 'Expense added successfully!',
-    'open_modal' => 'dailyExpensesModal',
-]);
+        'expense_success' => 'Expense added successfully!',
+        'open_modal' => 'dailyExpensesModal',
+    ]);
 
 }
 

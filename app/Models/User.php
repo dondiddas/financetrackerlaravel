@@ -23,6 +23,7 @@ class User extends Authenticatable
         'first_name',
         'middle_name',
         'last_name',
+        'dark_mode',
         'email',
         'password',
     ];

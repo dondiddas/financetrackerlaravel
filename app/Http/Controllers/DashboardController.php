@@ -30,10 +30,10 @@ class DashboardController extends Controller
 
     public function dashboard()
     {
-        $id = 1;
+        $id = auth()->id();
 
         // --- Get User Name ---
-        $user = User::where('id', $id)->first();
+        $user = User::find($id);
         $userName = $user ? $user->first_name : 'there';
 
         // --- Timezone---
@@ -51,6 +51,12 @@ class DashboardController extends Controller
         // --- Allowance + Expenses + Daily Expenses + Upcoming Bills---
         $AllowanceData = $this->allowanceController->getAllowanceOverview($id);
         $LastAllowanceData = $this->allowanceController->getLastMonthAllowance($id);
+        $IncomeData = $this->allowanceController->getIncomeOverview($id);
+        $LastIncomeData = $this->allowanceController->getLastMonthIncome($id);
+
+        // Combined totals (allowance + income)
+        $AllData = $AllowanceData + $IncomeData;
+        $LastAllData = $LastAllowanceData + $LastIncomeData;
 
 
         $expensesData = $this->expenseController->getCurrentMonthExpenses($id);
@@ -69,13 +75,28 @@ class DashboardController extends Controller
         $MonthlyLimitChart = $this->dailyLimiting->getMonthlyLimits($id);
         $upcomingbillsData = $this->upcomingbill->getUpcomingBills($id);
 
+        // Recent transactions grouped by date (most recent first)
+        $recentTransactions = \App\Models\Transaction::where('user_id', $id)
+            ->with(['category' => function($q){ $q->select('id','name','type'); }])
+            ->orderByDesc('transaction_date')
+            ->take(200)
+            ->get()
+            ->groupBy(function($t) {
+                return \Carbon\Carbon::parse($t->transaction_date)->format('F j, Y');
+            });
+
         // --- Spending Rate ---
         $spendingRate = ($AllowanceData > 0)
             ? ($expensesData / $AllowanceData) * 100
             : 0;
 
         // --- Cash Balance ---
-        $cashBalance = $AllowanceData - $expensesData;
+        // Compute different cash balance variants so the UI can toggle
+        $cashBalanceAllowance = $AllowanceData - $expensesData;
+        $cashBalanceIncome = $IncomeData - $expensesData;
+        $cashBalanceAll = $AllData - $expensesData;
+        // Default cashBalance shows allowance-based balance for backward compatibility
+        $cashBalance = $cashBalanceAllowance;
 
         // --- Colors ---
         $rateColor = $spendingRate < 50 ? 'text-success'
@@ -115,6 +136,9 @@ class DashboardController extends Controller
             'greeting',
             'userName',
             'cashBalance',
+            'cashBalanceAllowance',
+            'cashBalanceIncome',
+            'cashBalanceAll',
             'dailyExpensesData',
             'upcomingbillsData',
             'shadowColor',
@@ -129,7 +153,41 @@ class DashboardController extends Controller
             'topExpenses',
             'expensesName',
             'ExpensesPercentage',
-            'burnRate'
+            'burnRate',
+            'IncomeData', 
+            'LastIncomeData',
+            'AllData',
+            'LastAllData',
+            'recentTransactions',
+
         ));
+    }
+
+    /**
+     * Return recent transactions grouped by date as JSON for AJAX polling
+     */
+    public function recentTransactionsJson(Request $request)
+    {
+        $id = auth()->id();
+
+        $recent = \App\Models\Transaction::where('user_id', $id)
+            ->with(['category' => function($q){ $q->select('id','name','type'); }])
+            ->orderByDesc('transaction_date')
+            ->take(200)
+            ->get()
+            ->map(function($t){
+                return [
+                    'id' => $t->id,
+                    'amount' => number_format($t->amount, 2),
+                    'note' => $t->note,
+                    'category_name' => $t->category->name ?? 'No Category',
+                    'category_type' => $t->category->type ?? '',
+                    'transaction_date' => \Carbon\Carbon::parse($t->transaction_date)->format('F j, Y'),
+                ];
+            })
+            ->groupBy('transaction_date')
+            ->toArray();
+
+        return response()->json(['groups' => $recent]);
     }
 }

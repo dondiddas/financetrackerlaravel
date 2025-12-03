@@ -136,4 +136,46 @@ h6 {
   overflow: hidden;
 }
 
+/* Pagination tweaks: remove extra margins and keep compact on small screens */
+.pagination {
+  margin: 0;
+}
+
+/* Small devices: ensure pagination fits and doesn't create large spacing */
+@media (max-width: 575.98px) {
+  .card-footer {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+  #transactionsPagination .pagination {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+}
+
+/* Fix oversized/empty boxes for pagination arrows (icon font sizing issues) */
+#transactionsPagination .pagination .page-link,
+#transactionsPagination .pagination .page-link * {
+  font-size: 0.9rem !important;
+  line-height: 1 !important;
+}
+#transactionsPagination .pagination .page-link {
+  min-width: auto !important;
+  padding: 0.25rem 0.5rem !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+#transactionsPagination .pagination .page-link .fa,
+#transactionsPagination .pagination .page-link i,
+#transactionsPagination .pagination .page-link .fc-icon {
+  font-size: 0.9rem !important;
+  width: auto !important;
+  height: auto !important;
+}
+
+/* Defensive: if any invisible element is taking space, visually outline it during debugging
+   (remove or comment out in production if not needed) */
+/* #transactionsPagination .pagination * { outline: 1px dashed rgba(0,0,0,0.06); } */
+
 
