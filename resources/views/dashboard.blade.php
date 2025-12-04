@@ -15,23 +15,41 @@
                 <div class="col d-flex justify-content-end">
 
                     <div class="dropdown me-2">
-                        <button class="btn p-0 border-0 bg transaparent d-flex align-items-center" id="notifMenu"
+                        <button class="btn p-0 border-0 bg transaparent d-flex align-items-center position-relative" id="notifMenu"
                             data-bs-toggle="dropdown" aria-expanded="false">
                             <span
                                 class="rounded-circle bg-light border d-inline-flex align-items-center justify-content-center"
                                 style="width:50px;height:50px;">
                                 <i class="fa-solid fa-bell" style="font-size:18px;color:#6c757d"></i>
                             </span>
+                            @if(!empty($dueCount) && $dueCount > 0)
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:.65rem;">{{ $dueCount }}</span>
+                            @endif
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notifMenu" style="width:260px;">
+
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notifMenu" style="width:320px;">
                             <li class="dropdown-header fw-bold">Notifications</li>
+                            <li><hr class="dropdown-divider"></li>
 
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-
-                            <!-- Empty state -->
-                            <li class="text-center text-muted small py-2">No notifications</li>
+                            @if(empty($dueCount) || $dueCount === 0)
+                                <li class="text-center text-muted small py-2">No notifications</li>
+                            @else
+                                @foreach($dueSoonBills as $nb)
+                                    <li>
+                                        <a class="dropdown-item d-flex justify-content-between align-items-start" href="{{ route('bills.index') }}">
+                                            <div class="me-2">
+                                                <div class="fw-semibold">{{ $nb->bill_name }}</div>
+                                                <div class="small text-muted">Due {{ \Carbon\Carbon::parse($nb->due_date)->diffForHumans() }}</div>
+                                            </div>
+                                            <div class="text-end">
+                                                <div class="fw-semibold">₱{{ number_format($nb->amount,2) }}</div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                @endforeach
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-center small" href="{{ route('bills.index') }}">View all bills</a></li>
+                            @endif
                         </ul>
                     </div>
                     <div class="dropdown">
@@ -128,12 +146,10 @@
                     </div>
 
                     <style>
-                        /* Reduce KPI dropdown font so longer labels fit */
                         .kpi-allowance .dropdown-toggle {
                             font-size: 0.78rem;
                             line-height: 1;
                             padding: 0;
-                            /* allow a slightly wider button but keep it compact */
                             max-width: 160px;
                             display: inline-block;
                             white-space: normal;
@@ -142,7 +158,6 @@
                         .kpi-allowance .dropdown-menu .dropdown-item {
                             font-size: 0.78rem;
                             white-space: normal;
-                            /* allow the label to wrap if needed */
                             padding-top: .35rem;
                             padding-bottom: .35rem;
                         }
@@ -680,18 +695,16 @@
                                                 </label>
                                             </div>
 
+                                            @php
+                                                $recurrenceTypes = \App\Models\RecurrenceType::orderBy('name')->get();
+                                            @endphp
                                             <div class="mb-3">
                                                 <label class="form-label small">Recurrence</label>
-                                                <select name="recurrence_interval" class="form-select">
-                                                    <option value="monthly"
-                                                        {{ old('recurrence_interval') == 'monthly' ? 'selected' : '' }}>
-                                                        Monthly</option>
-                                                    <option value="weekly"
-                                                        {{ old('recurrence_interval') == 'weekly' ? 'selected' : '' }}>
-                                                        Weekly</option>
-                                                    <option value="yearly"
-                                                        {{ old('recurrence_interval') == 'yearly' ? 'selected' : '' }}>
-                                                        Yearly</option>
+                                                <select name="recurrence_type_id" class="form-select">
+                                                    <option value="">-- none --</option>
+                                                    @foreach($recurrenceTypes as $rt)
+                                                        <option value="{{ $rt->id }}" {{ (string)old('recurrence_type_id') === (string)$rt->id ? 'selected' : '' }}>{{ ucfirst($rt->name) }}</option>
+                                                    @endforeach
                                                 </select>
                                             </div>
 

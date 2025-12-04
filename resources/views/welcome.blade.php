@@ -230,22 +230,20 @@
 
 <body>
 
-    <!-- Header -->
+{{-- header --}}
     <header class="site-header transparent" id="siteHeader">
         <nav class="container d-flex align-items-center justify-content-between navbar">
             <a class="brand text-dark text-decoration-none" href="#">FinanceTracker</a>
             <div class="d-flex gap-2">
-                <a href="#" class="btn btn-link text-dark">Login</a>
+                <a href="{{ route('login') }}" class="btn btn-link text-dark">Login</a>
                 <a href="#" class="btn btn-success text-white">Get Started</a>
             </div>
         </nav>
     </header>
 
-<!-- Hero -->
+{{-- Hero --}}
 <section id="hero" class="position-relative overflow-hidden">
-  <!-- Background gradients & floating shapes -->
   <div class="hero-bg position-absolute w-100 h-100 top-0 start-0" style="z-index:0;">
-    <!-- Gradient overlay -->
     <div style="position:absolute; width:120%; height:120%; background: radial-gradient(circle at 20% 30%, rgba(40,167,69,0.15), transparent 70%); top:-10%; left:-10%; animation: float1 12s ease-in-out infinite alternate;"></div>
     <div style="position:absolute; width:100%; height:100%; background: radial-gradient(circle at 80% 80%, rgba(16,185,129,0.1), transparent 70%); top:0; left:0; animation: float2 15s ease-in-out infinite alternate;"></div>
     <div style="position:absolute; width:50px; height:50px; background: rgba(40,167,69,0.2); border-radius:50%; top:20%; left:15%; animation: float3 18s ease-in-out infinite alternate;"></div>
@@ -284,16 +282,7 @@
   </div>
 </section>
 
-<style>
-/* Floating shapes animations */
-@keyframes float1 { 0%{transform:translateY(0px) translateX(0px);} 100%{transform:translateY(20px) translateX(10px);} }
-@keyframes float2 { 0%{transform:translateY(0px) translateX(0px);} 100%{transform:translateY(-15px) translateX(-10px);} }
-@keyframes float3 { 0%{transform:translateY(0px) translateX(0px);} 100%{transform:translateY(25px) translateX(-20px);} }
-@keyframes float4 { 0%{transform:translateY(0px) translateX(0px);} 100%{transform:translateY(-20px) translateX(15px);} }
-</style>
-
-
-    <!-- Features -->
+    {{-- features --}}
     <section id="features" style="background: linear-gradient(180deg,#071018 0%, #0b1720 100%); color: rgba(255,255,255,0.92); padding: 4rem 1rem;">
         <div class="container">
             <div class="text-center mb-4">
@@ -324,7 +313,7 @@
         </div>
     </section>
 
-    <!-- Insights -->
+    {{-- Insights --}}
     <section id="insights">
         <div class="container">
             <div class="insights-grid">
@@ -349,7 +338,7 @@
   <svg width="100%" height="250" viewBox="0 0 600 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="animated bar chart">
     <rect width="100%" height="100%" rx="10" fill="#fbfdff"/>
     
-    <!-- Bars -->
+    {{-- Bars --}}
     <rect x="40" width="40" height="100" y="150" fill="#28a745" class="bar"/>
     <rect x="100" width="40" height="120" y="130" fill="#28a745" class="bar"/>
     <rect x="160" width="40" height="80" y="170" fill="#28a745" class="bar"/>
@@ -388,7 +377,7 @@
         </div>
     </section>
 
-    <!-- Footer -->
+    {{-- Footer --}}
     <footer class="site-footer">
         <div class="container">
             <div class="row">
@@ -402,6 +391,7 @@
                     <ul class="list-unstyled small">
                         <li class="footer-link">support@financetracker.app</li>
                         <li class="footer-link">Twitter: @financetracker</li>
+                    
                     </ul>
                 </div>
                 <div class="col-6 col-md-3 mb-3">

@@ -58,7 +58,7 @@ public function getLastMonthIncome($userid)
 {
     $request->validate([
         'amount' => 'required|numeric|min:1',
-        'type' => 'required|in:income,allowance', // must be one of the two
+        'type' => 'required|in:income,allowance', 
         'note' => 'nullable|string|max:255',
     ]);
 

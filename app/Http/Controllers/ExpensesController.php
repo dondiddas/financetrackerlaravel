@@ -48,14 +48,13 @@ public function getDailyExpenseBreakdown($userId)
      */
     public function index(Request $request)
     {
-        $userId = auth()->id() ?? 1;
+        $userId = auth()->id();
 
         $query = Transaction::with('category')
             ->where('user_id', $userId)
             ->orderByDesc('transaction_date')
             ->orderByDesc('created_at');
 
-        // Filter by type (income/expense/all)
         if ($request->filled('type') && in_array($request->type, ['income','expense','allowance'])) {
             $type = $request->type;
             $query->whereHas('category', function($q) use ($type) {
@@ -63,12 +62,10 @@ public function getDailyExpenseBreakdown($userId)
             });
         }
 
-        // Filter by category id
         if ($request->filled('category')) {
             $query->where('category_id', $request->category);
         }
 
-        // Date range filters (from / to)
         if ($request->filled('from')) {
             $query->whereDate('transaction_date', '>=', $request->from);
         }
@@ -76,7 +73,6 @@ public function getDailyExpenseBreakdown($userId)
             $query->whereDate('transaction_date', '<=', $request->to);
         }
 
-        // Search q in note or category name
         if ($request->filled('q')) {
             $q = $request->q;
             $query->where(function($sub) use ($q) {
@@ -90,7 +86,6 @@ public function getDailyExpenseBreakdown($userId)
         $perPage = (int) $request->input('per', 10);
         $transactions = $query->paginate($perPage)->withQueryString();
 
-        // categories for filter dropdown
         $categories = Categories::where('user_id', $userId)->orderBy('name')->get();
 
         return view('transactions.index', compact('transactions','categories'));
@@ -99,16 +94,14 @@ public function getDailyExpenseBreakdown($userId)
 
     public function addDaily(Request $request)
 {
-    // Validate the input
     $request->validate([
         'category_name' => 'required|string|max:255',
         'amount' => 'required|numeric|min:0',
         'note' => 'required|string|max:255',
     ]);
 
-    // Check if category exists; if not, create it
        $category = Categories::firstOrCreate(
-        ['name' => $request->category_name, 'user_id' => auth()->id() ?? 1],
+        ['name' => $request->category_name, 'user_id' => auth()->id()],
         ['type' => 'expense'] 
     );
 
@@ -117,15 +110,13 @@ public function getDailyExpenseBreakdown($userId)
         'category_id' => $category->id,
         'amount' => $request->amount,
         'note' => $request->note,
-        'user_id' => auth()->id() ?? 1, // if you have auth
+        'user_id' => auth()->id(),
     ]);
 
-    // If this is an AJAX request, return JSON so the frontend can update without full reload
     if ($request->ajax() || $request->wantsJson()) {
-        $userId = auth()->id() ?? 1;
+        $userId = auth()->id();
         $dailyTotal = $this->getDailyExpenses($userId);
 
-        // We will return some basic info about the created expense to update the UI
         return response()->json([
             'success' => true,
             'message' => 'Expense added successfully!',

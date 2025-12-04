@@ -8,7 +8,9 @@ class UpcomingBillsController extends Controller
 {
     public function getUpcomingBills($userid)
     {
-        $getUpcomingBills = Bills::select('id','bill_name', 'amount', 'due_date','description','is_recurring','recurrence_interval')
+        // Eager load recurrence type and select the fields we need
+        $getUpcomingBills = Bills::with('recurrenceType')
+            ->select('id','bill_name', 'amount', 'due_date','description','is_recurring','recurrence_type_id')
             ->where('user_id', $userid)
             ->whereDate('due_date', '>=', now())
             ->orderBy('due_date', 'asc')
@@ -20,17 +22,21 @@ class UpcomingBillsController extends Controller
     public function getBill($id)
 {
     
-    $bill = Bills::find($id);
+    $bill = Bills::with('recurrenceType')->find($id);
 
     if (!$bill) {
         return response()->json(['error' => 'Bill not found'], 404);
     }
 
     return response()->json([
+        'id' => $bill->id,
         'bill_name' => $bill->bill_name,
         'amount' => $bill->amount,
-        'due_date' => $bill->due_date->format('M d, Y'),
-        'is_paid' => $bill->is_paid,
+        'due_date' => $bill->due_date ? $bill->due_date->toDateString() : null,
+        'is_paid' => (bool) $bill->is_paid,
+        'description' => $bill->description,
+        'is_recurring' => (bool) $bill->is_recurring,
+        'recurrence_type_id' => $bill->recurrence_type_id,
     ]);
 }
 
@@ -45,24 +51,25 @@ class UpcomingBillsController extends Controller
 
 public function store(Request $request)
 {
-    $request->validate([
-        'bill_name' => 'required|string|max:255',
-        'amount' => 'required|numeric|min:0',
-        'due_date' => 'required|date',
+
+        $request->validate([
+            'bill_name' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0',
+            'due_date' => 'required|date',
             'description' => 'nullable|string|max:500',
             'is_recurring' => 'nullable|boolean',
-            'recurrence_interval' => 'nullable|string|in:weekly,monthly,yearly',
-    ]);
+            'recurrence_type_id' => 'nullable|exists:recurrence_types,id',
+        ]);
 
-    Bills::create([
-        'user_id' => auth()->id() ?? 1,
-        'bill_name' => $request->bill_name,
-        'amount' => $request->amount,
-        'due_date' => $request->due_date,
+        Bills::create([
+            'user_id' => auth()->id() ?? 1,
+            'bill_name' => $request->bill_name,
+            'amount' => $request->amount,
+            'due_date' => $request->due_date,
             'description' => $request->description,
             'is_recurring' => $request->has('is_recurring') ? true : false,
-            'recurrence_interval' => $request->recurrence_interval ?: null,
-    ]);
+            'recurrence_type_id' => $request->recurrence_type_id ?: null,
+        ]);
 
     return redirect()->back()->with('success', 'Bill added successfully!');
 }
@@ -120,17 +127,20 @@ public function store(Request $request)
         $bill->is_paid = true;
         $bill->save();
 
-        // If recurring, create the next occurrence based on recurrence_interval
-        if ($bill->is_recurring && $bill->recurrence_interval) {
+        // If recurring, create the next occurrence based on recurrence type
+        if ($bill->is_recurring && $bill->recurrence_type_id) {
             $nextDue = null;
             try {
                 $dt = \Carbon\Carbon::parse($bill->due_date);
-                if ($bill->recurrence_interval === 'monthly') {
+                $type = $bill->recurrenceType->name ?? null;
+                if ($type === 'monthly') {
                     $nextDue = $dt->addMonth()->toDateString();
-                } elseif ($bill->recurrence_interval === 'weekly') {
+                } elseif ($type === 'weekly') {
                     $nextDue = $dt->addWeek()->toDateString();
-                } elseif ($bill->recurrence_interval === 'yearly') {
+                } elseif ($type === 'yearly') {
                     $nextDue = $dt->addYear()->toDateString();
+                } elseif ($type === 'daily') {
+                    $nextDue = $dt->addDay()->toDateString();
                 }
             } catch (\Exception $e) {
                 $nextDue = null;
@@ -144,12 +154,54 @@ public function store(Request $request)
                     'due_date' => $nextDue,
                     'description' => $bill->description,
                     'is_recurring' => true,
-                    'recurrence_interval' => $bill->recurrence_interval,
+                    'recurrence_type_id' => $bill->recurrence_type_id,
                 ]);
             }
         }
 
         return redirect()->back()->with('success', 'Bill marked as paid.');
+    }
+
+    /**
+     * Soft-delete a bill
+     */
+    public function destroy(Request $request, $id)
+    {
+        $bill = Bills::find($id);
+        if (!$bill) {
+            return redirect()->back()->with('error', 'Bill not found.');
+        }
+
+        $bill->delete();
+
+        return redirect()->back()->with('success', 'Bill removed. It can be restored from the trash if needed.');
+    }
+
+    /**
+     * Update an existing bill
+     */
+    public function update(Request $request, $id)
+    {
+        $bill = Bills::findOrFail($id);
+
+        $request->validate([
+            'bill_name' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0',
+            'due_date' => 'required|date',
+            'description' => 'nullable|string|max:500',
+            'is_recurring' => 'nullable|boolean',
+            'recurrence_type_id' => 'nullable|exists:recurrence_types,id',
+        ]);
+
+        $bill->bill_name = $request->bill_name;
+        $bill->amount = $request->amount;
+        $bill->due_date = $request->due_date;
+        $bill->description = $request->description;
+        $bill->is_recurring = $request->has('is_recurring') ? true : false;
+        $bill->recurrence_type_id = $request->recurrence_type_id ?: null;
+        $bill->save();
+
+        return redirect()->back()->with('success', 'Bill updated successfully.');
     }
 
 

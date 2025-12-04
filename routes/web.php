@@ -41,7 +41,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/bills/{id}', [UpcomingBillsController::class, 'getBill'])->name('bills.get');
     Route::get('/bills', [UpcomingBillsController::class, 'index'])->name('bills.index');
     Route::post('/bills/{id}/pay', [UpcomingBillsController::class, 'markPaid'])->name('bills.pay');
+    Route::put('/bills/{id}', [UpcomingBillsController::class, 'update'])->name('bills.update');
     Route::put('/bills/{id}/description', [UpcomingBillsController::class, 'updateDescription'])->name('bills.updateDescription');
+    Route::delete('/bills/{id}', [UpcomingBillsController::class, 'destroy'])->name('bills.destroy');
     Route::post('/upcoming-bills/store', [UpcomingBillsController::class, 'store'])->name('upcoming-bills.store');
 
     // Transactions
@@ -49,6 +51,9 @@ Route::middleware('auth')->group(function () {
 
     // Budgets
     Route::get('/budgets', [BudgetController::class, 'index'])->name('budgets.index');
+    Route::post('/budgets', [BudgetController::class, 'store'])->name('budgets.store');
+    Route::put('/budgets/{id}', [BudgetController::class, 'update'])->name('budgets.update');
+    
 
     // Reports
     Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');

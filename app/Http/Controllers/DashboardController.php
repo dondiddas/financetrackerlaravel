@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Bills;
 use App\Http\Controllers\UpcomingBillsController;
 use App\Http\Controllers\AllowanceController;
 use App\Http\Controllers\ExpensesController;
@@ -74,6 +75,20 @@ class DashboardController extends Controller
         $weeklyLimitChart = $this->dailyLimiting->getWeeklyLimits($id);
         $MonthlyLimitChart = $this->dailyLimiting->getMonthlyLimits($id);
         $upcomingbillsData = $this->upcomingbill->getUpcomingBills($id);
+
+        // --- Bills due soon (for notifications) ---
+        $dueSoonBills = collect();
+        if ($id) {
+            // Only notify for bills due exactly 3 days from today
+            $targetDate = now()->addDays(3)->toDateString();
+            $dueSoonBills = Bills::where('user_id', $id)
+                ->where('is_paid', 0)
+                ->whereDate('due_date', '=', $targetDate)
+                ->orderBy('due_date')
+                ->take(8)
+                ->get();
+        }
+        $dueCount = $dueSoonBills->count();
 
         // Recent transactions grouped by date (most recent first)
         $recentTransactions = \App\Models\Transaction::where('user_id', $id)
@@ -159,6 +174,8 @@ class DashboardController extends Controller
             'AllData',
             'LastAllData',
             'recentTransactions',
+            'dueSoonBills',
+            'dueCount',
 
         ));
     }

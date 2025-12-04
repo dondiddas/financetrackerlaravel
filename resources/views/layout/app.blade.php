@@ -60,6 +60,111 @@ window.addEventListener("scroll", function () {
 </script>
 
 
+<div class="modal fade" id="globalFeedbackModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-sm">
+            <div class="modal-body text-center py-4">
+                <div id="globalFeedbackIcon" class="mb-3 fs-1"></div>
+                <h5 id="globalFeedbackTitle" class="mb-2"></h5>
+                <div id="globalFeedbackMessage" class="small text-muted mb-3"></div>
+                <div id="globalFeedbackTip" class="alert alert-info small" style="display:none;"></div>
+                <div class="d-grid">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function(){
+        const feedback = {
+            success: @json(session('success')),
+            error: @json(session('error')),
+            tip: @json(session('error_tip')),
+            info: @json(session('info')),
+            validationErrors: @json($errors->any() ? $errors->all() : []),
+        };
+
+        // Determine what to show
+        let type = null;
+        let title = '';
+        let message = '';
+        let tip = '';
+
+        if (feedback.success) {
+            type = 'success';
+            title = 'Success';
+            message = feedback.success;
+        } else if (feedback.error || feedback.validationErrors.length) {
+            type = 'error';
+            title = 'Something went wrong';
+            message = feedback.error || (feedback.validationErrors.length ? feedback.validationErrors[0] : 'An error occurred.');
+            tip = feedback.tip || (feedback.validationErrors.length ? 'Please correct the highlighted fields and try again.' : 'Try again or contact support if the issue persists.');
+        } else if (feedback.info) {
+            type = 'info';
+            title = 'Info';
+            message = feedback.info;
+        }
+
+        if (type) {
+            // Populate modal
+            const iconEl = document.getElementById('globalFeedbackIcon');
+            const titleEl = document.getElementById('globalFeedbackTitle');
+            const msgEl = document.getElementById('globalFeedbackMessage');
+            const tipEl = document.getElementById('globalFeedbackTip');
+
+            if (type === 'success') {
+                iconEl.innerHTML = '<i class="fa-solid fa-circle-check text-success"></i>';
+                titleEl.className = 'mb-2';
+                titleEl.innerText = title;
+                msgEl.innerText = message;
+                tipEl.style.display = 'none';
+            } else if (type === 'error') {
+                iconEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-danger"></i>';
+                titleEl.className = 'mb-2 text-danger';
+                titleEl.innerText = title;
+                msgEl.innerText = message;
+                if (tip) {
+                    tipEl.style.display = 'block';
+                    tipEl.innerText = tip;
+                }
+            } else if (type === 'info') {
+                iconEl.innerHTML = '<i class="fa-solid fa-circle-info text-primary"></i>';
+                titleEl.className = 'mb-2';
+                titleEl.innerText = title;
+                msgEl.innerText = message;
+                tipEl.style.display = 'none';
+            }
+
+            // debug: log feedback object to console so we can verify server flashes
+            try { console.log('GlobalFeedback debug', { type, title, message, tip, feedback }); } catch(e){}
+
+            // Show modal when bootstrap is available
+            function showModalWhenReady() {
+                try {
+                    if (window.bootstrap && typeof window.bootstrap.Modal === 'function') {
+                        const modalEl = document.getElementById('globalFeedbackModal');
+                        const modal = window.bootstrap.Modal.getOrCreateInstance(modalEl);
+                        modal.show();
+                        return true;
+                    }
+                } catch (e) {}
+                return false;
+            }
+
+            if (!showModalWhenReady()) {
+                let attempts = 0;
+                const id = setInterval(() => {
+                    attempts++;
+                    if (showModalWhenReady() || attempts > 10) clearInterval(id);
+                }, 100);
+            }
+        }
+    })();
+</script>
+
 </body>
 </html>
+
 

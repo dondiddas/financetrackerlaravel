@@ -81,7 +81,7 @@
 
         <div class="card bills-card p-3 mb-3">
             <div class="bills-toolbar mb-2">
-                <form method="GET" class="d-flex align-items-center w-100 g-2" style="gap:.5rem;">
+                <form id="billsFilterForm" method="GET" class="d-flex align-items-center w-100 g-2" style="gap:.5rem;">
                     <div class="d-flex w-100 align-items-center" style="gap:.5rem;">
                         <div class="input-group search-input" style="flex:1;">
                         <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
@@ -108,11 +108,38 @@
                     </select>
 
                     <div class="ms-auto d-flex gap-2">
-                        <button class="btn btn-primary" type="submit">Apply</button>
                         <a href="{{ route('bills.index') }}" class="btn btn-outline">Reset</a>
                     </div>
                     </div>
                 </form>
+
+                <script>
+                    (function(){
+                        const form = document.getElementById('billsFilterForm');
+                        if (!form) return;
+
+                        // Auto-submit when selects change
+                        const selects = form.querySelectorAll('select[name="status"], select[name="recurring"]');
+                        selects.forEach(s => s.addEventListener('change', () => form.submit()));
+
+                        // Debounced search input submit
+                        const search = form.querySelector('input[type="search"][name="q"]');
+                        if (search) {
+                            let timeout = null;
+                            search.addEventListener('input', function() {
+                                if (timeout) clearTimeout(timeout);
+                                timeout = setTimeout(() => form.submit(), 500);
+                            });
+                            // If user presses Enter, submit immediately
+                            search.addEventListener('keydown', function(e) {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    form.submit();
+                                }
+                            });
+                        }
+                    })();
+                </script>
             </div>
 
             <div class="table-responsive">
@@ -151,7 +178,7 @@
                                 </td>
 
                                 <td data-label="Recurrence">
-                                    {{ $bill->recurrence_interval ?? '-' }}
+                                    {{ $bill->recurrenceType->name ?? '-' }}
                                 </td>
 
                                 <td data-label="Status">
@@ -168,14 +195,29 @@
 
                                 <td data-label="Actions" class="text-end">
                                     <div class="d-flex justify-content-end gap-2">
-                                        @if(!$bill->is_paid)
-                                            <form action="{{ route('bills.pay', $bill->id) }}" method="POST" class="d-inline">
+                                        <div class="d-flex align-items-center" style="gap:.5rem;">
+                                            @if(!$bill->is_paid)
+                                                <form action="{{ route('bills.pay', $bill->id) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button class="btn btn-sm btn-outline-success">
+                                                        <i class="fa-solid fa-check me-1"></i>
+                                                        Mark Paid
+                                                    </button>
+                                                </form>
+                                            @endif
+
+                                            <button type="button" class="btn btn-sm btn-outline-secondary edit-bill-btn" data-id="{{ $bill->id }}">
+                                                <i class="fa-solid fa-pen me-1"></i>
+                                            </button>
+
+                                            <form action="{{ route('bills.destroy', $bill->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this bill? This action can be undone from the trash.');">
                                                 @csrf
-                                                <button class="btn btn-sm btn-outline-success">
-                                                    <i class="fa-solid fa-check me-1"></i>Mark Paid
+                                                @method('DELETE')
+                                                <button class="btn btn-sm btn-outline-danger">
+                                                    <i class="fa-solid fa-trash me-1"></i>
                                                 </button>
                                             </form>
-                                        @endif
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
@@ -197,4 +239,202 @@
 
     </div>
 
+
+<!-- Add Bill Modal (moved from dashboard) -->
+<div class="modal fade" id="addBillModal" tabindex="-1" aria-labelledby="addBillModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title fw-semibold" id="addBillModalLabel">Add New Bill</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form action="{{ route('upcoming-bills.store') }}" method="POST">
+                @csrf
+
+                <div class="modal-body">
+
+                    <!-- Bill Name -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Bill Name</label>
+                        <input type="text" class="form-control" name="bill_name" required>
+                    </div>
+
+                    <!-- Amount -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Amount</label>
+                        <input type="number" step="0.01" class="form-control" name="amount" required>
+                    </div>
+
+                    <!-- Due Date -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Due Date</label>
+                        <input type="date" class="form-control" name="due_date" required>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Description (optional)</label>
+                        <textarea class="form-control" name="description" rows="3"></textarea>
+                    </div>
+
+                    <!-- Recurring checkbox -->
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" value="1" id="is_recurring" name="is_recurring" {{ old('is_recurring', true) ? 'checked' : '' }}>
+                        <label class="form-check-label small" for="is_recurring">
+                            Recurring bill
+                        </label>
+                    </div>
+
+                    @php
+                        $recurrenceTypes = \App\Models\RecurrenceType::orderBy('name')->get();
+                    @endphp
+                    <div class="mb-3">
+                        <label class="form-label small">Recurrence</label>
+                        <select name="recurrence_type_id" class="form-select">
+                            <option value="">-- none --</option>
+                            @foreach($recurrenceTypes as $rt)
+                                <option value="{{ $rt->id }}" {{ (string)old('recurrence_type_id') === (string)$rt->id ? 'selected' : '' }}>{{ ucfirst($rt->name) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Bill</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Bill Modal -->
+<div class="modal fade" id="editBillModal" tabindex="-1" aria-labelledby="editBillModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-semibold" id="editBillModalLabel">Edit Bill</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form id="editBillForm" method="POST">
+                @csrf
+                @method('PUT')
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Bill Name</label>
+                        <input type="text" id="edit_bill_name" class="form-control" name="bill_name" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Amount</label>
+                        <input type="number" step="0.01" id="edit_amount" class="form-control" name="amount" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Due Date</label>
+                        <input type="date" id="edit_due_date" class="form-control" name="due_date" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Description (optional)</label>
+                        <textarea class="form-control" id="edit_description" name="description" rows="3"></textarea>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" value="1" id="edit_is_recurring" name="is_recurring">
+                        <label class="form-check-label small" for="edit_is_recurring">Recurring bill</label>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small">Recurrence</label>
+                        <select id="edit_recurrence_type_id" name="recurrence_type_id" class="form-select">
+                            <option value="">-- none --</option>
+                            @foreach($recurrenceTypes as $rt)
+                                <option value="{{ $rt->id }}">{{ ucfirst($rt->name) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function(){
+        const editButtons = document.querySelectorAll('.edit-bill-btn');
+        if (!editButtons.length) return;
+
+        const editForm = document.getElementById('editBillForm');
+        const editModalEl = document.getElementById('editBillModal');
+
+        function getBootstrapModal() {
+            try {
+                if (window.bootstrap && typeof window.bootstrap.Modal === 'function') {
+                    return window.bootstrap.Modal.getOrCreateInstance(editModalEl);
+                }
+            } catch (e) {
+                return null;
+            }
+            return null;
+        }
+
+        editButtons.forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const id = this.getAttribute('data-id');
+                try {
+                    const res = await fetch(`/bills/${id}`);
+                    if (!res.ok) throw new Error('Failed to load bill');
+                    const data = await res.json();
+
+                    // populate form
+                    document.getElementById('edit_bill_name').value = data.bill_name || '';
+                    document.getElementById('edit_amount').value = data.amount || '';
+                    document.getElementById('edit_due_date').value = data.due_date || '';
+                    document.getElementById('edit_description').value = data.description || '';
+                    document.getElementById('edit_is_recurring').checked = !!data.is_recurring;
+                    document.getElementById('edit_recurrence_type_id').value = data.recurrence_type_id || '';
+
+                    // set form action
+                    editForm.action = `/bills/${id}`;
+
+                    // Show the modal, waiting briefly if bootstrap isn't ready yet
+                    let shown = false;
+                    const tryShow = () => {
+                        const modal = getBootstrapModal();
+                        if (modal) {
+                            modal.show();
+                            shown = true;
+                        }
+                    };
+
+                    tryShow();
+                    if (!shown) {
+                        // try again a few times (in case scripts load later)
+                        let attempts = 0;
+                        const interval = setInterval(() => {
+                            attempts++;
+                            tryShow();
+                            if (shown || attempts > 10) clearInterval(interval);
+                        }, 100);
+                    }
+                } catch (err) {
+                    alert('Could not load bill for editing.');
+                }
+            });
+        });
+    })();
+</script>
 @endsection

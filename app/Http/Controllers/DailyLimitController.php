@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 use Carbon\CarbonInterface;
-use App\Models\Categories;
+use App\Models\DailyLimit;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -14,10 +14,7 @@ class DailyLimitController extends Controller
     public function getDailyLimit($userId)
     {
         $today = Carbon::today()->toDateString();
-
-        return Categories::where('user_id', $userId)
-            ->where('name', 'Daily Limit')
-            ->where('type', 'other')
+        return DailyLimit::where('user_id', $userId)
             ->whereDate('limit_date', $today)
             ->value('expense_limit') ?? 0;
     }
@@ -35,11 +32,9 @@ class DailyLimitController extends Controller
         $today = now()->setTimezone('Asia/Manila')->toDateString();
 
         // Update or create a daily limit record
-        Categories::updateOrCreate(
+        DailyLimit::updateOrCreate(
             [
                 'user_id' => $userId,
-                'name' => 'Daily Limit',
-                'type' => 'other',
                 'limit_date' => $today,
             ],
             [
@@ -62,9 +57,7 @@ class DailyLimitController extends Controller
     for ($i = 0; $i < 7; $i++) {
         $date = $startOfWeek->copy()->addDays($i)->toDateString();
 
-        $limit = Categories::where('user_id', $userId)
-            ->where('name', 'Daily Limit')
-            ->where('type', 'other')
+        $limit = DailyLimit::where('user_id', $userId)
             ->whereDate('limit_date', $date)
             ->value('expense_limit') ?? 0;
 
@@ -85,9 +78,7 @@ class DailyLimitController extends Controller
             $monthStart = Carbon::create(null, $m, 1)->startOfMonth()->toDateString();
             $monthEnd = Carbon::create(null, $m, 1)->endOfMonth()->toDateString();
 
-            $monthlyLimit = Categories::where('user_id', $userId)
-                ->where('name', 'Daily Limit')
-                ->where('type', 'other')
+            $monthlyLimit = DailyLimit::where('user_id', $userId)
                 ->whereBetween('limit_date', [$monthStart, $monthEnd])
                 ->sum('expense_limit');
 
