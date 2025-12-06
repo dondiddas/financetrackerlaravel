@@ -1,5 +1,5 @@
 function selectKPI(event, type, el) {
-    event.preventDefault();       // Prevent link navigation
+    event.preventDefault();       
     event.stopPropagation();      // Prevent modal
 
     const card = el.closest('.card');
@@ -34,7 +34,6 @@ function selectKPI(event, type, el) {
         `;
     }
 
-    // Programmatically close the dropdown (we used stopPropagation so bootstrap won't auto-close)
     try {
         const dd = bootstrap.Dropdown.getOrCreateInstance(button);
         dd.hide();

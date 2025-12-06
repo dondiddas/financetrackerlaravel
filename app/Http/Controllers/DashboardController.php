@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Bills;
+use App\Models\Budget;
 use App\Http\Controllers\UpcomingBillsController;
 use App\Http\Controllers\AllowanceController;
 use App\Http\Controllers\ExpensesController;
@@ -76,7 +77,7 @@ class DashboardController extends Controller
         $MonthlyLimitChart = $this->dailyLimiting->getMonthlyLimits($id);
         $upcomingbillsData = $this->upcomingbill->getUpcomingBills($id);
 
-        // --- Bills due soon (for notifications) ---
+        //bills notification
         $dueSoonBills = collect();
         if ($id) {
             // Only notify for bills due exactly 3 days from today
@@ -127,6 +128,29 @@ class DashboardController extends Controller
 
         $categories = DB::table('categories')->where('type', 'expense')->get();
 
+        // budget carousel 
+        $currentMonth = now()->format('Y-m');
+        $budgets = Budget::where('budgets.user_id', $id)
+            ->leftJoin('categories', 'budgets.category_id', '=', 'categories.id')
+            ->leftJoin(
+                DB::raw("(SELECT category_id, SUM(amount) as spent 
+                          FROM transactions 
+                          WHERE user_id = $id 
+                          AND DATE_FORMAT(transaction_date, '%Y-%m') = '$currentMonth'
+                          GROUP BY category_id) as t"),
+                'budgets.category_id',
+                '=',
+                't.category_id'
+            )
+            ->select(
+                'budgets.*',
+                'categories.name as category_name',
+                'categories.type as category_type',
+                DB::raw('COALESCE(t.spent, 0) as spent'),
+                DB::raw('CASE WHEN budgets.amount > 0 THEN ROUND((COALESCE(t.spent, 0) / budgets.amount) * 100) ELSE 0 END as percent')
+            )
+            ->get();
+
 
                     //  dd($AllowanceData, $LastAllowanceData, $expensesData);
 //                     dd([
@@ -176,6 +200,7 @@ class DashboardController extends Controller
             'recentTransactions',
             'dueSoonBills',
             'dueCount',
+            'budgets',
 
         ));
     }

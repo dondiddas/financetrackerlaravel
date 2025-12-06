@@ -16,18 +16,13 @@ class BudgetController extends Controller
     public function index(Request $request)
     {
         $userId = auth()->id();
-
-        // Load budgets for user with category using Eloquent
         $budgets = Budget::with('category')
             ->where('user_id', $userId)
             ->get();
-
-        // Sort in PHP by category name (avoids ambiguous SQL joins)
         $budgets = $budgets->sortBy(function($b) {
             return $b->category->name ?? '';
         })->values();
 
-        // For each budget compute spent this month
         $currentMonthStart = now()->startOfMonth()->toDateString();
         $currentMonthEnd = now()->endOfMonth()->toDateString();
 
@@ -48,7 +43,6 @@ class BudgetController extends Controller
             }
         }
 
-        // Compute progress percent and remaining and shape data explicitly so views can access attributes
         $budgets = $budgets->map(function($b) use ($spent) {
             $limit = (float) $b->amount;
             $spentAmt = $spent[$b->category_id] ?? 0.0;

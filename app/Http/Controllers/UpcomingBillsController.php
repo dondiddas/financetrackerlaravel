@@ -62,7 +62,7 @@ public function store(Request $request)
         ]);
 
         Bills::create([
-            'user_id' => auth()->id() ?? 1,
+            'user_id' => auth()->id(),
             'bill_name' => $request->bill_name,
             'amount' => $request->amount,
             'due_date' => $request->due_date,
@@ -77,7 +77,7 @@ public function store(Request $request)
     // Show all bills (upcoming + overdue)
     public function index(Request $request)
     {
-        $userId = auth()->id() ?? 1;
+        $userId = auth()->id();
 
         $query = Bills::where('user_id', $userId);
 

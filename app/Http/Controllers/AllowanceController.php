@@ -66,11 +66,11 @@ public function getLastMonthIncome($userid)
     $category = Categories::firstOrCreate([
         'name' => ucfirst($request->type), 
         'type' => $request->type,
-        'user_id' => auth()->id() ?? 1,
+        'user_id' => auth()->id(),
     ]);
 
     Transaction::create([
-        'user_id' => auth()->id() ?? 1,
+        'user_id' => auth()->id(),
         'category_id' => $category->id,
         'amount' => $request->amount,
         'note' => $request->note ?? "Added {$request->type}",

@@ -225,6 +225,84 @@
             opacity: 1;
             transform: none;
         }
+
+        /* Modal Styles */
+        .modal-content {
+            border-radius: 1rem;
+            border: 1px solid rgba(11, 23, 32, 0.04);
+            box-shadow: 0 20px 60px var(--shadow);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid rgba(11, 23, 32, 0.08);
+            padding: 1.5rem;
+        }
+
+        .modal-title {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: #0b1720;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-label {
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            color: #0b1720;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            border-radius: 0.5rem;
+            border: 1px solid rgba(11, 23, 32, 0.15);
+            padding: 0.65rem 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.15);
+        }
+
+        .btn-modal-primary {
+            background: var(--accent);
+            border: none;
+            color: white;
+            border-radius: 0.75rem;
+            padding: 0.65rem 1.5rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .btn-modal-primary:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .modal-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .modal-link:hover {
+            text-decoration: underline;
+        }
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+            border-radius: 0.5rem;
+            color: #721c24;
+            font-family: 'Inter', sans-serif;
+        }
     </style>
 </head>
 
@@ -235,8 +313,8 @@
         <nav class="container d-flex align-items-center justify-content-between navbar">
             <a class="brand text-dark text-decoration-none" href="#">FinanceTracker</a>
             <div class="d-flex gap-2">
-                <a href="{{ route('login') }}" class="btn btn-link text-dark">Login</a>
-                <a href="#" class="btn btn-success text-white">Get Started</a>
+                <button class="btn btn-link text-dark" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
+                <button class="btn btn-success text-white" data-bs-toggle="modal" data-bs-target="#registerModal">Get Started</button>
             </div>
         </nav>
     </header>
@@ -255,7 +333,7 @@
       <h1 class="hero-title reveal">Take control of your money with clarity and confidence</h1>
       <p class="hero-sub reveal">Smart budgets, automated reminders, and visual insights to guide your financial decisions.</p>
       <div class="d-flex gap-2 cta-group mb-3 reveal">
-        <a href="{{ route('login') }}" class="btn btn-success">Start Tracking</a>
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#registerModal">Start Tracking</button>
         <a href="#insights" class="btn btn-outline-secondary">Learn More</a>
       </div>
       <p class="muted small reveal">Trusted by individuals who want a simpler, clearer way to manage money.</p>
@@ -414,6 +492,140 @@
         </div>
     </footer>
 
+    {{-- Login Modal --}}
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Welcome Back</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @if($errors->any())
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <form method="POST" action="{{ route('login.post') }}">
+                        @csrf
+                        <div class="mb-3">
+                            <label for="login-email" class="form-label">Email</label>
+                            <input id="login-email" type="email" name="email" value="{{ old('email') }}" required class="form-control" placeholder="you@example.com" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="login-password" class="form-label">Password</label>
+                            <input id="login-password" type="password" name="password" required class="form-control" placeholder="Enter your password" />
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                            <label class="form-check-label" for="remember">Remember me</label>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-modal-primary">Login</button>
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <span class="text-muted">Don't have an account?</span>
+                            <a class="modal-link" data-bs-toggle="modal" data-bs-target="#registerModal" data-bs-dismiss="modal">Sign up</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Register Modal --}}
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="registerModalLabel">Create Your Account</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @if($errors->any())
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <form method="POST" action="{{ route('register.post') }}">
+                        @csrf
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="first_name" class="form-label">First Name</label>
+                                    <input id="first_name" type="text" name="first_name" value="{{ old('first_name') }}" required class="form-control" placeholder="" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="middle_name" class="form-label">Middle Name</label>
+                                    <input id="middle_name" type="text" name="middle_name" value="{{ old('middle_name') }}" required class="form-control" placeholder="" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="last_name" class="form-label">Last Name</label>
+                                    <input id="last_name" type="text" name="last_name" value="{{ old('last_name') }}" required class="form-control" placeholder="" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="register-email" class="form-label">Email</label>
+                            <input id="register-email" type="email" name="email" value="{{ old('email') }}" required class="form-control" placeholder="you@gmail.com" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="register-password" class="form-label">Password</label>
+                            <input id="register-password" type="password" name="password" required class="form-control" placeholder="Create a strong password" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password_confirmation" class="form-label">Confirm Password</label>
+                            <input id="password_confirmation" type="password" name="password_confirmation" required class="form-control" placeholder="Re-enter your password" />
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-modal-primary">Create Account</button>
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <span class="text-muted">Already have an account?</span>
+                            <a class="modal-link" data-bs-toggle="modal" data-bs-target="#loginModal" data-bs-dismiss="modal">Login</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if(session('registration_success'))
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 1080;">
+            <div id="regToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        {{ session('registration_success') }}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <script>
         (function() {
             const header = document.getElementById('siteHeader');
@@ -434,6 +646,27 @@
                 threshold: 0.12
             });
             document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+            // Show registration success toast
+            @if(session('registration_success'))
+                var toastEl = document.getElementById('regToast');
+                if (toastEl) {
+                    var toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+                    toast.show();
+                }
+            @endif
+
+            // Show login modal if there are errors and old input contains email (login form was submitted)
+            @if($errors->any() && old('email') && !old('first_name'))
+                var loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+                loginModal.show();
+            @endif
+
+            // Show register modal if there are errors and old input contains first_name (register form was submitted)
+            @if($errors->any() && old('first_name'))
+                var registerModal = new bootstrap.Modal(document.getElementById('registerModal'));
+                registerModal.show();
+            @endif
         })();
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

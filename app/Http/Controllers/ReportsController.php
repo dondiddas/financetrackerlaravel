@@ -13,7 +13,7 @@ class ReportsController extends Controller
      */
     public function index(Request $request)
     {
-        $userId = auth()->id() ?? 1;
+        $userId = auth()->id();
 
         // Date range (optional)
         $from = $request->input('from');
@@ -71,7 +71,7 @@ class ReportsController extends Controller
      */
     public function exportCsv(Request $request)
     {
-        $userId = auth()->id() ?? 1;
+        $userId = auth()->id();
         $from = $request->input('from');
         $to = $request->input('to');
         $type = $request->input('type');

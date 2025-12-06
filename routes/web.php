@@ -6,7 +6,13 @@ use App\Http\Controllers\DailyLimitController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\ReportsController;
+use App\Http\Controllers\UserProfileController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -18,14 +24,11 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 
-// Dashboard route
-// Protected app routes
-use App\Http\Controllers\BudgetController;
-use App\Http\Controllers\ReportsController;
+
 
 Route::middleware('auth')->group(function () {
-    // Settings
-    Route::get('/settings', [\App\Http\Controllers\UserProfileController::class, 'showSettings'])->name('settings');
+    // Dasboard and Settings
+    Route::get('/settings', [UserProfileController::class, 'showSettings'])->name('settings');
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
     Route::get('/recent-transactions', [DashboardController::class, 'recentTransactionsJson'])->name('recent.transactions');
 
@@ -60,21 +63,19 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports/export', [ReportsController::class, 'exportCsv'])->name('reports.export');
 
     // Profile update
-    Route::put('/profile', [\App\Http\Controllers\UserProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile', [UserProfileController::class, 'update'])->name('profile.update');
 
     // Logout route
-    Route::post('/logout', function (\Illuminate\Http\Request $request) {
-        \Illuminate\Support\Facades\Auth::logout();
+    Route::post('/logout', function (Request $request) {
+        Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect('/');
     })->name('logout');
 });
 
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
 
-// Logout route (simple implementation) and profile update
+// Logout route  and profile update
 Route::post('/logout', function (Request $request) {
     Auth::logout();
     $request->session()->invalidate();
@@ -82,6 +83,6 @@ Route::post('/logout', function (Request $request) {
     return redirect('/');
 })->name('logout');
 
-Route::put('/profile', [\App\Http\Controllers\UserProfileController::class, 'update'])->name('profile.update');
+Route::put('/profile', [UserProfileController::class, 'update'])->name('profile.update');
 
 

@@ -28,7 +28,7 @@ class DailyLimitController extends Controller
             'amount' => 'required|numeric|min:0',
         ]);
 
-        $userId = auth()->id() ?? 1;
+        $userId = auth()->id();
         $today = now()->setTimezone('Asia/Manila')->toDateString();
 
         // Update or create a daily limit record

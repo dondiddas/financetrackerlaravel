@@ -183,18 +183,73 @@
                         </div>
                     </div>
 
-                    {{-- Savings --}}
+                    {{-- Budgets Carousel --}}
                     <div class="card border no-hover">
-                        <div class="card-body kpi-highlight">
+                        <div class="card-body py-2">
                             <div class="d-flex gap-2 mb-1 align-items-center">
-                                <i class="fas fa-money-bills text-muted"></i>
-                                <h6 class="mb-0 fw-semibold text-dark">Savings</h6>
+                                <i class="fas fa-wallet text-muted"></i>
+                                <h6 class="mb-0 fw-semibold text-dark">Budgets</h6>
                             </div>
                             <div class="text-center">
-                                <h1 class="fw-semibold mb-0 fs-2 fs-md-1">
-                                    ₱{{ number_format($cashBalance, 2) }}
-                                </h1>
-                                <div class="my-4"></div>
+                                @if($budgets->isEmpty())
+                                    <div class="py-2">
+                                        <p class="text-muted mb-0 small">No budgets set</p>
+                                        <a href="{{ route('budgets.index') }}" class="btn btn-sm btn-outline-primary mt-2">
+                                            <i class="fas fa-plus"></i> Add Budget
+                                        </a>
+                                    </div>
+                                @else
+                                    <div id="budgetsCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
+                                        <div class="carousel-inner">
+                                            @foreach($budgets as $index => $budget)
+                                                @php
+                                                    $spent = $budget->spent ?? 0;
+                                                    $amount = $budget->amount ?? 0;
+                                                    $percent = $amount > 0 ? round(($spent / $amount) * 100) : 0;
+                                                    $progressColor = $percent >= 100 ? 'danger' : ($percent >= 80 ? 'warning' : 'success');
+                                                @endphp
+                                                <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+                                                    <div class="py-1">
+                                                        <h6 class="fw-semibold mb-1">{{ $budget->category_name }}</h6>
+                                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                                            <div class="text-start">
+                                                                <small class="text-muted d-block" style="font-size: 0.7rem;">Spent</small>
+                                                                <strong class="fs-6">₱{{ number_format($spent, 2) }}</strong>
+                                                            </div>
+                                                            <div class="text-end">
+                                                                <small class="text-muted d-block" style="font-size: 0.7rem;">Limit</small>
+                                                                <strong class="fs-6">₱{{ number_format($amount, 2) }}</strong>
+                                                            </div>
+                                                        </div>
+                                                        <div class="progress" style="height: 8px;">
+                                                            <div class="progress-bar bg-{{ $progressColor }}" 
+                                                                 role="progressbar" 
+                                                                 style="width: {{ min($percent, 100) }}%"
+                                                                 aria-valuenow="{{ $percent }}" 
+                                                                 aria-valuemin="0" 
+                                                                 aria-valuemax="100">
+                                                            </div>
+                                                        </div>
+                                                        <small class="text-muted mt-1 d-block" style="font-size: 0.7rem;">{{ $percent }}% used</small>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                        @if($budgets->count() > 1)
+                                            <div class="carousel-indicators position-relative mt-1" style="margin-bottom: 0;">
+                                                @foreach($budgets as $index => $budget)
+                                                    <button type="button" 
+                                                            data-bs-target="#budgetsCarousel" 
+                                                            data-bs-slide-to="{{ $index }}" 
+                                                            class="{{ $index === 0 ? 'active' : '' }}"
+                                                            aria-current="{{ $index === 0 ? 'true' : 'false' }}" 
+                                                            aria-label="Budget {{ $index + 1 }}">
+                                                    </button>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -212,14 +267,6 @@
                                 </h1>
                                 <p class="text-muted small mb-1">per day on average</p>
 
-                                <div class="mt-2">
-                                    <span class="badge bg-light text-dark">
-                                        Weekly: ₱{{ number_format($burnRate['weekly'], 2) }}
-                                    </span>
-                                    <span class="badge bg-light text-dark mt-1">
-                                        Monthly: ₱{{ number_format($burnRate['monthly'], 2) }}
-                                    </span>
-                                </div>
                             </div>
                         </div>
                     </div>
