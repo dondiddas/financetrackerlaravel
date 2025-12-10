@@ -69,14 +69,6 @@
                 <h3 class="mb-0">Bills & Subscriptions</h3>
                 <small class="text-muted">Manage recurring payments, overdue items and reminders</small>
             </div>
-            <div class="d-flex align-items-center gap-2">
-                <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary d-none d-md-inline">
-                    <i class="fa-solid fa-arrow-left me-2"></i>Back
-                </a>
-                <a href="#addBillModal" data-bs-toggle="modal" class="btn btn-primary">
-                    <i class="fa-solid fa-plus me-1"></i> Add Bill
-                </a>
-            </div>
         </div>
 
         <div class="card bills-card p-3 mb-3">
@@ -110,6 +102,12 @@
                     <div class="ms-auto d-flex gap-2">
                         <a href="{{ route('bills.index') }}" class="btn btn-outline">Reset</a>
                     </div>
+
+                                <div class="d-flex align-items-center gap-2">
+                <a href="#addBillModal" data-bs-toggle="modal" class="btn btn-primary">
+                    <i class="fa-solid fa-plus me-1"></i> 
+                </a>
+            </div>
                     </div>
                 </form>
 
@@ -118,11 +116,9 @@
                         const form = document.getElementById('billsFilterForm');
                         if (!form) return;
 
-                        // Auto-submit when selects change
                         const selects = form.querySelectorAll('select[name="status"], select[name="recurring"]');
                         selects.forEach(s => s.addEventListener('change', () => form.submit()));
 
-                        // Debounced search input submit
                         const search = form.querySelector('input[type="search"][name="q"]');
                         if (search) {
                             let timeout = null;
@@ -130,7 +126,6 @@
                                 if (timeout) clearTimeout(timeout);
                                 timeout = setTimeout(() => form.submit(), 500);
                             });
-                            // If user presses Enter, submit immediately
                             search.addEventListener('keydown', function(e) {
                                 if (e.key === 'Enter') {
                                     e.preventDefault();
@@ -234,13 +229,13 @@
                     Showing {{ $bills->firstItem() ?? 0 }} - {{ $bills->lastItem() ?? 0 }} of {{ $bills->total() }} bills
                 </div>
                 <div id="billsPagination">{{ $bills->links() }}</div>
+                
             </div>
         </div>
 
     </div>
 
 
-<!-- Add Bill Modal (moved from dashboard) -->
 <div class="modal fade" id="addBillModal" tabindex="-1" aria-labelledby="addBillModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">

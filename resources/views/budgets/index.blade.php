@@ -2,26 +2,28 @@
 
 @section('content')
     <div class="container my-3">
-        <header class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-3">
+        <header class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 mb-3">
+
             <div>
                 <h3 class="mb-0">Budgets</h3>
                 <small class="text-muted">Monthly budgets and progress</small>
             </div>
 
             <div class="d-flex gap-2 align-items-center">
-                <label for="monthFilter" class="mb-0 text-muted">Month</label>
-                <select id="monthFilter" class="form-select form-select-sm">
+                @if($showTrashed)
                     @php
-                        $now = \Carbon\Carbon::now();
+                        $params = request()->query();
+                        unset($params['show']);
                     @endphp
-                    @for ($i = 0; $i < 12; $i++)
-                        @php $m = $now->copy()->subMonths($i); @endphp
-                        <option value="{{ $m->format('Y-m') }}"
-                            {{ request('month') == $m->format('Y-m') ? 'selected' : ($i == 0 && !request('month') ? 'selected' : '') }}>
-                            {{ $m->format('F Y') }}</option>
-                    @endfor
-                </select>
-                <button class="btn btn-sm btn-primary" id="addBudgetBtn"><i class="fa-solid fa-plus"></i> Add</button>
+                    <a href="{{ route('budgets.index', $params) }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fa-solid fa-arrow-left"></i> 
+                    </a>
+                @else
+                    <a href="{{ route('budgets.index', array_merge(request()->query(), ['show' => 'trash'])) }}" class="btn btn-sm btn-outline-warning">
+                        <i class="fa-solid fa-trash"></i> 
+                    </a>
+                @endif
+                <button class="btn btn-sm btn-primary" id="addBudgetBtn"><i class="fa-solid fa-plus"></i> </button>
             </div>
         </header>
         {{-- Flash messages --}}
@@ -74,49 +76,58 @@
             @endif
         </section>
 
-        {{-- cards --}}
-        <section class="mb-3">
-            <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
+{{-- cards --}}
+<section class="mb-3">
+    <div class="row g-3">
 
-                <!-- Savings -->
-                <div class="card border-0 shadow-sm flex-fill">
-                    <div class="card-body text-center text-md-start">
-                        <div class="d-flex gap-2 mb-1 align-items-center justify-content-center justify-content-md-start">
-                            <i class="fas fa-money-bills text-muted"></i>
-                            <h6 class="mb-0 fw-semibold text-dark">Savings</h6>
-                        </div>
-
-                        <h1 class="fw-semibold mb-0 fs-2">
-                            ₱{{ number_format($totalBudget ?? 0, 2) }}
-                        </h1>
+        <!-- Savings -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="fas fa-money-bills text-muted"></i>
+                        <h6 class="mb-0 fw-semibold text-dark">Savings</h6>
                     </div>
-                </div>
 
-                <!-- Spent This Month -->
-                <div class="card border-0 shadow-sm flex-fill">
-                    <div class="card-body text-center text-md-start">
-                        <div class="d-flex gap-2 mb-1 align-items-center justify-content-center justify-content-md-start">
-                            <i class="fas fa-money-bills text-muted"></i>
-                            <h6 class="mb-0 fw-semibold text-dark">Spent This Month</h6>
-                        </div>
-                        <h1 class="fw-semibold mb-0 fs-2">
-                            ₱{{ number_format($totalSpent ?? 0, 2) }}
-                            </h1>
-                    </div>
+                    <h1 class="fw-semibold fs-2 mb-0">
+                        ₱{{ number_format($totalBudget ?? 0, 2) }}
+                    </h1>
                 </div>
-
-                <!-- Remaining -->
-                <div class="card border-0 shadow-sm flex-fill">
-                    <div class="card-body text-center text-md-end">
-                        <div class="small text-muted">Remaining</div>
-                        <div class="h5 fw-bold" id="totalRemaining">
-                            {{ number_format(($totalBudget ?? 0) - ($totalSpent ?? 0), 2) }}
-                        </div>
-                    </div>
-                </div>
-
             </div>
-        </section>
+        </div>
+
+        <!-- Spent This Month -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="fas fa-money-bills text-muted"></i>
+                        <h6 class="mb-0 fw-semibold text-dark">Spent This Month</h6>
+                    </div>
+
+                    <h1 class="fw-semibold fs-2 mb-0">
+                        ₱{{ number_format($totalSpent ?? 0, 2) }}
+                    </h1>
+                </div>
+            </div>
+        </div>
+
+        <!-- Remaining -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-md-end">
+                    <div class="small text-muted">Remaining</div>
+
+                    <div class="h4 fw-bold" id="totalRemaining">
+                        {{ number_format(($totalBudget ?? 0) - ($totalSpent ?? 0), 2) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
 
 
 
@@ -157,16 +168,34 @@
                                     <div>Spent: <span class="spent">{{ number_format($spent, 2) }}</span></div>
                                     <div>Remaining: <span
                                             class="remaining">{{ number_format(max($amount - $spent, 0), 2) }}</span></div>
-                                    <div class="percent">{{ $percent }}%</div>
+                                    <div class="percent fw-semibold text-dark">{{ $percent }}%</div>
                                 </div>
                             </div>
 
                             <div class="d-flex gap-2 align-items-start mt-3 mt-md-0">
-                                <button class="btn btn-sm btn-outline-secondary editBudgetBtn" data-bs-toggle="modal"
-                                    data-bs-target="#editBudgetModal" data-id="{{ $b->id }}"
-                                    data-amount="{{ $amount }}" data-spent="{{ $spent }}"
-                                    data-note="{{ $b->note ?? '' }}" data-category="{{ $b->category_id ?? '' }}"
-                                    title="Edit"><i class="fa-solid fa-pen"></i></button>
+                                @if(!$showTrashed)
+                                    <button class="btn btn-sm btn-outline-secondary editBudgetBtn" data-bs-toggle="modal"
+                                        data-bs-target="#editBudgetModal" data-id="{{ $b->id }}"
+                                        data-amount="{{ $amount }}" data-spent="{{ $spent }}"
+                                        data-note="{{ $b->note ?? '' }}" data-category="{{ $b->category_id ?? '' }}"
+                                        title="Edit"><i class="fa-solid fa-pen"></i></button>
+
+                                    <form action="{{ route('budgets.destroy', $b->id) }}" method="POST"
+                                          onsubmit="return confirm('Delete this budget?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-sm btn-outline-danger" title="Delete">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </form>
+                                @else
+                                    <form action="{{ route('budgets.restore', $b->id) }}" method="POST">
+                                        @csrf
+                                        <button class="btn btn-sm btn-outline-success" title="Restore">
+                                            <i class="fa-solid fa-undo"></i>
+                                        </button>
+                                    </form>
+                                @endif
                             </div>
                         </div>
                     @empty
@@ -182,11 +211,12 @@
 
         <!-- Add Budget Modal -->
         <div class="modal fade" id="addBudgetModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-sm">
+            <div class="modal-dialog modal-dialog-centered modal-md">
+
                 <div class="modal-content">
                     <form id="addBudgetForm" action="{{ route('budgets.store') }}" method="POST">
                         @csrf
-                        <div class="modal-header">
+                        <div class="modal-header bg-success text-white ">
                             <h5 class="modal-title">Add Budget</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
@@ -219,12 +249,13 @@
 
         <!-- Edit Budget Modal -->
         <div class="modal fade" id="editBudgetModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-sm">
+            <div class="modal-dialog modal-dialog-centered modal-md">
+
                 <div class="modal-content">
                     <form id="editBudgetForm" action="#" method="POST">
                         @csrf
                         @method('PUT')
-                        <div class="modal-header">
+                        <div class="modal-header bg-success text-white">
                             <h5 class="modal-title">Edit Budget</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
@@ -268,7 +299,19 @@
 
             .list-group-item {
                 transition: transform .15s ease, box-shadow .15s ease;
+                
             }
+            .alert i {
+    font-size: 1.2rem;
+    margin-top: 2px;
+}
+
+            .budget-item {
+        flex-wrap: wrap;
+    }
+    .budget-item > div:last-child {
+        white-space: nowrap;
+    }
 
             .list-group-item:active {
                 transform: scale(.998);

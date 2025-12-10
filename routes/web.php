@@ -51,11 +51,15 @@ Route::middleware('auth')->group(function () {
 
     // Transactions
     Route::get('/transactions', [ExpensesController::class, 'index'])->name('transactions.index');
+    Route::delete('/transactions/{id}', [ExpensesController::class, 'destroy'])->name('transactions.destroy');
+    Route::post('/transactions/{id}/restore', [ExpensesController::class, 'restore'])->name('transactions.restore');
 
     // Budgets
     Route::get('/budgets', [BudgetController::class, 'index'])->name('budgets.index');
     Route::post('/budgets', [BudgetController::class, 'store'])->name('budgets.store');
     Route::put('/budgets/{id}', [BudgetController::class, 'update'])->name('budgets.update');
+    Route::delete('/budgets/{id}', [BudgetController::class, 'destroy'])->name('budgets.destroy');
+    Route::post('/budgets/{id}/restore', [BudgetController::class, 'restore'])->name('budgets.restore');
     
 
     // Reports

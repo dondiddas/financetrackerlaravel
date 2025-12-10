@@ -48,10 +48,8 @@ window.addEventListener("scroll", function () {
     let currentScroll = window.scrollY;
 
     if (currentScroll > lastScroll) {
-        // scrolling down → hide navbar
         mobileNav.style.transform = "translateY(100%)";
     } else {
-        // scrolling up → show navbar
         mobileNav.style.transform = "translateY(0)";
     }
 
@@ -86,7 +84,6 @@ window.addEventListener("scroll", function () {
             validationErrors: @json($errors->any() ? $errors->all() : []),
         };
 
-        // Determine what to show
         let type = null;
         let title = '';
         let message = '';
@@ -108,7 +105,6 @@ window.addEventListener("scroll", function () {
         }
 
         if (type) {
-            // Populate modal
             const iconEl = document.getElementById('globalFeedbackIcon');
             const titleEl = document.getElementById('globalFeedbackTitle');
             const msgEl = document.getElementById('globalFeedbackMessage');
@@ -137,10 +133,8 @@ window.addEventListener("scroll", function () {
                 tipEl.style.display = 'none';
             }
 
-            // debug: log feedback object to console so we can verify server flashes
             try { console.log('GlobalFeedback debug', { type, title, message, tip, feedback }); } catch(e){}
 
-            // Show modal when bootstrap is available
             function showModalWhenReady() {
                 try {
                     if (window.bootstrap && typeof window.bootstrap.Modal === 'function') {

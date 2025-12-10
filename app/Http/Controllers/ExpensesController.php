@@ -50,10 +50,16 @@ public function getDailyExpenseBreakdown($userId)
     {
         $userId = auth()->id();
 
+        $showTrashed = $request->input('show') === 'trash';
+
         $query = Transaction::with('category')
             ->where('user_id', $userId)
             ->orderByDesc('transaction_date')
             ->orderByDesc('created_at');
+
+        if ($showTrashed) {
+            $query->onlyTrashed();
+        }
 
         if ($request->filled('type') && in_array($request->type, ['income','expense','allowance'])) {
             $type = $request->type;
@@ -88,7 +94,7 @@ public function getDailyExpenseBreakdown($userId)
 
         $categories = Categories::where('user_id', $userId)->orderBy('name')->get();
 
-        return view('transactions.index', compact('transactions','categories'));
+        return view('transactions.index', compact('transactions','categories', 'showTrashed'));
     }
 
 
@@ -271,7 +277,44 @@ public function getBurnRate($userId)
     ];
 }
 
+    /**
+     * Delete a transaction owned by the authenticated user.
+     */
+    public function destroy($id)
+    {
+        $userId = auth()->id();
 
+        $transaction = Transaction::where('id', $id)
+            ->where('user_id', $userId)
+            ->first();
 
+        if (!$transaction) {
+            return redirect()->back()->with('error', 'Transaction not found.');
+        }
 
+        $transaction->delete();
+
+        return redirect()->back()->with('success', 'Transaction deleted successfully.');
+    }
+
+    /**
+     * Restore a soft-deleted transaction.
+     */
+    public function restore($id)
+    {
+        $userId = auth()->id();
+
+        $transaction = Transaction::onlyTrashed()
+            ->where('id', $id)
+            ->where('user_id', $userId)
+            ->first();
+
+        if (!$transaction) {
+            return redirect()->back()->with('error', 'Transaction not found or not in trash.');
+        }
+
+        $transaction->restore();
+
+        return redirect()->back()->with('success', 'Transaction restored successfully.');
+    }
 }

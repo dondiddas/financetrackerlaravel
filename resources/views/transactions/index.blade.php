@@ -41,6 +41,19 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h3 class="mb-0">Transactions</h3>
         <div class="d-flex gap-2">
+            @if($showTrashed)
+                @php
+                    $params = request()->query();
+                    unset($params['show']);
+                @endphp
+                <a href="{{ route('transactions.index', $params) }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Active
+                </a>
+            @else
+                <a href="{{ route('transactions.index', array_merge(request()->query(), ['show' => 'trash'])) }}" class="btn btn-sm btn-outline-warning">
+                    <i class="fa-solid fa-trash"></i> View Trash
+                </a>
+            @endif
             <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addIncomeModal">Add Income</button>
             <button class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#addExpenseModal">Add Expense</button>
         </div>
@@ -108,6 +121,7 @@
                         <th>Type</th>
                         <th>Note</th>
                         <th class="text-end">Amount</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
 
@@ -119,10 +133,29 @@
                             <td data-label="Type">{{ $t->category->type ?? '—' }}</td>
                             <td data-label="Note">{{ $t->note }}</td>
                             <td data-label="Amount" class="text-end">₱{{ number_format($t->amount,2) }}</td>
+                            <td data-label="Actions" class="text-end">
+                              @if($showTrashed)
+                                <form action="{{ route('transactions.restore', $t->id) }}" method="POST" class="d-inline">
+                                  @csrf
+                                  <button class="btn btn-sm btn-outline-success" title="Restore">
+                                    <i class="fa-solid fa-undo"></i>
+                                  </button>
+                                </form>
+                              @else
+                                <form action="{{ route('transactions.destroy', $t->id) }}" method="POST" class="d-inline"
+                                    onsubmit="return confirm('Delete this transaction?');">
+                                  @csrf
+                                  @method('DELETE')
+                                  <button class="btn btn-sm btn-outline-danger" title="Delete">
+                                    <i class="fa-solid fa-trash"></i>
+                                  </button>
+                                </form>
+                              @endif
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center p-3 text-muted">No transactions found.</td>
+                            <td colspan="6" class="text-center p-3 text-muted">No transactions found.</td>
                         </tr>
                     @endforelse
                 </tbody>

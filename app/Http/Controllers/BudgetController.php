@@ -16,9 +16,17 @@ class BudgetController extends Controller
     public function index(Request $request)
     {
         $userId = auth()->id();
-        $budgets = Budget::with('category')
-            ->where('user_id', $userId)
-            ->get();
+        $showTrashed = $request->input('show') === 'trash';
+
+        $budgetsQuery = Budget::with('category')
+            ->where('user_id', $userId);
+
+        if ($showTrashed) {
+            $budgetsQuery->onlyTrashed();
+        }
+
+        $budgets = $budgetsQuery->get();
+
         $budgets = $budgets->sortBy(function($b) {
             return $b->category->name ?? '';
         })->values();
@@ -67,7 +75,7 @@ class BudgetController extends Controller
         $totalBudget = $budgets->sum('amount');
         $totalSpent = array_sum(array_values($spent));
 
-        return view('budgets.index', compact('budgets','totalBudget','totalSpent'));
+        return view('budgets.index', compact('budgets','totalBudget','totalSpent', 'showTrashed'));
     }
 
     /**
@@ -115,6 +123,47 @@ class BudgetController extends Controller
         $budget->save();
 
         return redirect()->route('budgets.index')->with('success', 'Budget updated successfully.');
+    }
+
+    /**
+     * Delete a budget for the authenticated user.
+     */
+    public function destroy($id)
+    {
+        $userId = auth()->id();
+
+        $budget = Budget::where('id', $id)
+            ->where('user_id', $userId)
+            ->first();
+
+        if (!$budget) {
+            return redirect()->route('budgets.index')->with('error', 'Budget not found.');
+        }
+
+        $budget->delete();
+
+        return redirect()->route('budgets.index')->with('success', 'Budget deleted successfully.');
+    }
+
+    /**
+     * Restore a soft-deleted budget.
+     */
+    public function restore($id)
+    {
+        $userId = auth()->id();
+
+        $budget = Budget::onlyTrashed()
+            ->where('id', $id)
+            ->where('user_id', $userId)
+            ->first();
+
+        if (!$budget) {
+            return redirect()->route('budgets.index', ['show' => 'trash'])->with('error', 'Budget not found or not in trash.');
+        }
+
+        $budget->restore();
+
+        return redirect()->route('budgets.index')->with('success', 'Budget restored successfully.');
     }
 }
 

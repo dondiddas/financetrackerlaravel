@@ -24,7 +24,6 @@ class UserProfileController extends Controller
             'last_name' => 'nullable|string|max:255',
             'email' => ['required','email','max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:8|confirmed',
-            'dark_mode' => 'nullable|boolean',
         ]);
 
         $user->first_name = $data['first_name'] ?? $user->first_name;
@@ -36,10 +35,6 @@ class UserProfileController extends Controller
             $user->password = $data['password'];
         }
 
-        if (array_key_exists('dark_mode', $data)) {
-            // When checkbox is present it will be truthy; otherwise we leave existing value
-            $user->dark_mode = (bool) $data['dark_mode'];
-        }
 
         $user->save();
 
