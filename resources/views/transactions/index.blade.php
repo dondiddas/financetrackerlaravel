@@ -61,8 +61,8 @@
 
     <!-- Filters Card -->
     <div class="card mb-3">
-        <div class="card-body">
-            <form id="transactionsFilters" class="row gy-2 gx-2 align-items-end">
+      <div class="card-body">
+        <form id="transactionsFilters" class="row gy-2 gx-2 align-items-end" method="GET" action="{{ route('transactions.index') }}">
 
                 <div class="col-md-3">
                     <label class="form-label">From</label>
@@ -96,12 +96,14 @@
                     </select>
                 </div>
 
-                <div class="col-md-1">
-                    <button id="clearFilters" type="button" class="btn btn-outline-secondary w-100">Clear</button>
+                <div class="col-md-3">
+                  <label class="form-label">Search</label>
+                  <input type="text" name="q" class="form-control" placeholder="Search note or category" value="{{ request('q') }}">
                 </div>
 
-                <div class="col-12">
-                    <input type="text" name="q" class="form-control" placeholder="Search note or category" value="{{ request('q') }}">
+                <div class="col-md-2 d-flex gap-2">
+                  <button type="submit" class="btn btn-primary w-100">Apply</button>
+                  <a href="{{ route('transactions.index') }}" class="btn btn-outline-secondary w-100">Clear</a>
                 </div>
             </form>
         </div>
@@ -165,13 +167,17 @@
         <div class="card-footer d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
 
             <div>
-                <small>Per page:
-                    <select id="perPageSelect" class="form-select form-select-sm d-inline-block" style="width:auto">
-                        <option value="10" {{ request('per',10)==10 ? 'selected':'' }}>10</option>
-                        <option value="25" {{ request('per')==25 ? 'selected':'' }}>25</option>
-                        <option value="50" {{ request('per')==50 ? 'selected':'' }}>50</option>
-                    </select>
-                </small>
+              <form method="GET" action="{{ route('transactions.index') }}" class="d-flex align-items-center gap-2">
+                @foreach(request()->except('per') as $key => $value)
+                  <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                @endforeach
+                <small>Per page:</small>
+                <select name="per" class="form-select form-select-sm d-inline-block" style="width:auto" onchange="this.form.submit()">
+                  <option value="10" {{ request('per',10)==10 ? 'selected':'' }}>10</option>
+                  <option value="25" {{ request('per')==25 ? 'selected':'' }}>25</option>
+                  <option value="50" {{ request('per')==50 ? 'selected':'' }}>50</option>
+                </select>
+              </form>
             </div>
         </div>
     </div>
@@ -241,6 +247,6 @@
   </div>
 </div>
 
-<script src="{{ asset('js/transactions-filters.js') }}"></script>
+{{-- JS disabled: transactions-filters.js removed --}}
 
 @endsection

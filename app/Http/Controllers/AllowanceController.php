@@ -14,6 +14,10 @@ class AllowanceController extends Controller
             ->whereHas('category', function($query) {
                 $query->where('type','allowance');
             })
+            ->where(function($q) {
+                $q->whereNull('deduction_source')
+                  ->orWhere('deduction_source', '!=', 'allowance');
+            })
             ->whereMonth('transaction_date', now()->month)
             ->whereYear('transaction_date', now()->year)
             ->sum('amount');
@@ -26,21 +30,29 @@ class AllowanceController extends Controller
             ->whereHas('category', function($query) {
                 $query->where('type','allowance');
             })
+            ->where(function($q) {
+                $q->whereNull('deduction_source')
+                  ->orWhere('deduction_source', '!=', 'allowance');
+            })
             ->whereMonth('transaction_date', $lastMonth->month)
             ->whereYear('transaction_date', $lastMonth->year)
             ->sum('amount');
     }
 
     public function getIncomeOverview($userid)
-{
-    return Transaction::where('user_id', $userid)
-        ->whereHas('category', function($query) {
-            $query->where('type','income');
-        })
-        ->whereMonth('transaction_date', now()->month)
-        ->whereYear('transaction_date', now()->year)
-        ->sum('amount');
-}
+    {
+        return Transaction::where('user_id', $userid)
+            ->whereHas('category', function($query) {
+                $query->where('type','income');
+            })
+            ->where(function($q) {
+                $q->whereNull('deduction_source')
+                  ->orWhere('deduction_source', '!=', 'income');
+            })
+            ->whereMonth('transaction_date', now()->month)
+            ->whereYear('transaction_date', now()->year)
+            ->sum('amount');
+    }
 
 public function getLastMonthIncome($userid)
 {
@@ -48,6 +60,10 @@ public function getLastMonthIncome($userid)
     return Transaction::where('user_id', $userid)
         ->whereHas('category', function($query) {
             $query->where('type','income');
+        })
+        ->where(function($q) {
+            $q->whereNull('deduction_source')
+              ->orWhere('deduction_source', '!=', 'income');
         })
         ->whereMonth('transaction_date', $lastMonth->month)
         ->whereYear('transaction_date', $lastMonth->year)

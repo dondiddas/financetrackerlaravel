@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Bills;
 use App\Models\Budget;
+use App\Models\Transaction;
 use App\Http\Controllers\UpcomingBillsController;
 use App\Http\Controllers\AllowanceController;
 use App\Http\Controllers\ExpensesController;
@@ -30,7 +31,7 @@ class DashboardController extends Controller
         $this->dailyLimiting = $dailyLimitController;
     }
 
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         $id = auth()->id();
 
@@ -80,7 +81,6 @@ class DashboardController extends Controller
         //bills notification
         $dueSoonBills = collect();
         if ($id) {
-            // Only notify for bills due exactly 3 days from today
             $targetDate = now()->addDays(3)->toDateString();
             $dueSoonBills = Bills::where('user_id', $id)
                 ->where('is_paid', 0)
@@ -91,8 +91,7 @@ class DashboardController extends Controller
         }
         $dueCount = $dueSoonBills->count();
 
-        // Recent transactions grouped by date (most recent first)
-        $recentTransactions = \App\Models\Transaction::where('user_id', $id)
+        $recentTransactions = Transaction::where('user_id', $id)
             ->with(['category' => function($q){ $q->select('id','name','type'); }])
             ->orderByDesc('transaction_date')
             ->take(200)
@@ -107,12 +106,55 @@ class DashboardController extends Controller
             : 0;
 
         // --- Cash Balance ---
-        // Compute different cash balance variants so the UI can toggle
         $cashBalanceAllowance = $AllowanceData - $expensesData;
         $cashBalanceIncome = $IncomeData - $expensesData;
         $cashBalanceAll = $AllData - $expensesData;
-        // Default cashBalance shows allowance-based balance for backward compatibility
-        $cashBalance = $cashBalanceAllowance;
+
+        // Get overview type from request 
+        $overviewType = $request->input('overview_type', 'allowance');
+        $overviewLabels = [
+            'allowance' => 'Allowance Overview',
+            'income' => 'Income Overview',
+            'all' => 'All Overview'
+        ];
+        
+        // Set overview data based on selected type
+        if ($overviewType === 'income') {
+            $overviewCurrent = $IncomeData;
+            $overviewPrevious = $LastIncomeData;
+        } elseif ($overviewType === 'all') {
+            $overviewCurrent = $AllData;
+            $overviewPrevious = $LastAllData;
+        } else {
+            $overviewCurrent = $AllowanceData;
+            $overviewPrevious = $LastAllowanceData;
+            $overviewType = 'allowance'; 
+        }
+
+        // Sync cash balance with overview type (unless explicitly set via balance_type param)
+        if (!$request->has('balance_type')) {
+            // If no explicit balance_type, use the overview_type
+            $balanceType = $overviewType;
+        } else {
+            // If balance_type is explicitly set, use it
+            $balanceType = $request->input('balance_type', 'allowance');
+        }
+        
+        $balanceLabels = [
+            'allowance' => 'Allowance Balance',
+            'income' => 'Income Balance',
+            'all' => 'All Balance'
+        ];
+        
+        // Set cash balance based on selected type
+        if ($balanceType === 'income') {
+            $cashBalance = $cashBalanceIncome;
+        } elseif ($balanceType === 'all') {
+            $cashBalance = $cashBalanceAll;
+        } else {
+            $cashBalance = $cashBalanceAllowance;
+            $balanceType = 'allowance'; // normalize
+        }
 
         // --- Colors ---
         $rateColor = $spendingRate < 50 ? 'text-success'
@@ -178,6 +220,12 @@ class DashboardController extends Controller
             'cashBalanceAllowance',
             'cashBalanceIncome',
             'cashBalanceAll',
+            'balanceType',
+            'balanceLabels',
+            'overviewType',
+            'overviewLabels',
+            'overviewCurrent',
+            'overviewPrevious',
             'dailyExpensesData',
             'upcomingbillsData',
             'shadowColor',
@@ -210,9 +258,9 @@ class DashboardController extends Controller
      */
     public function recentTransactionsJson(Request $request)
     {
-        $id = auth()->id();
+        $id = auth();
 
-        $recent = \App\Models\Transaction::where('user_id', $id)
+        $recent = Transaction::where('user_id', $id)
             ->with(['category' => function($q){ $q->select('id','name','type'); }])
             ->orderByDesc('transaction_date')
             ->take(200)

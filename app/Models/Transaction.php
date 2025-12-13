@@ -17,6 +17,7 @@ class Transaction extends Model
         'transaction_date',
         'user_id',       // allow mass assignment
         'category_id',   // allow mass assignment
+        'deduction_source', // allow mass assignment (allowance or income)
     ];
 
     protected $dates = ['transaction_date'];

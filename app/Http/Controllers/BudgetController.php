@@ -3,10 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use App\Models\Categories;
 use App\Models\Budget;
 use App\Models\Transaction;
+use Illuminate\Support\Facades\Auth;
 
 class BudgetController extends Controller
 {
@@ -15,7 +14,7 @@ class BudgetController extends Controller
      */
     public function index(Request $request)
     {
-        $userId = auth()->id();
+        $userId = Auth::id();
         $showTrashed = $request->input('show') === 'trash';
 
         $budgetsQuery = Budget::with('category')
@@ -83,7 +82,8 @@ class BudgetController extends Controller
      */
     public function store(Request $request)
     {
-        $userId = auth()->id();
+        $userId = Auth::id();
+
 
         $data = $request->validate([
             'category_id' => 'required|integer',
@@ -104,7 +104,7 @@ class BudgetController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $userId = auth()->id() ?? 1;
+       $userId = Auth::id();
 
         $data = $request->validate([
             'category_id' => 'required|integer',
@@ -130,7 +130,7 @@ class BudgetController extends Controller
      */
     public function destroy($id)
     {
-        $userId = auth()->id();
+        $userId = Auth::id();
 
         $budget = Budget::where('id', $id)
             ->where('user_id', $userId)
@@ -150,7 +150,7 @@ class BudgetController extends Controller
      */
     public function restore($id)
     {
-        $userId = auth()->id();
+        $userId = Auth::id();
 
         $budget = Budget::onlyTrashed()
             ->where('id', $id)

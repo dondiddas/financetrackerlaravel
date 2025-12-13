@@ -15,56 +15,71 @@
                 <div class="col d-flex justify-content-end">
 
                     <div class="dropdown me-2">
-                        <button class="btn p-0 border-0 bg transaparent d-flex align-items-center position-relative" id="notifMenu"
-                            data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="btn p-0 border-0 bg transaparent d-flex align-items-center position-relative"
+                            id="notifMenu" data-bs-toggle="dropdown" aria-expanded="false">
                             <span
                                 class="rounded-circle bg-light border d-inline-flex align-items-center justify-content-center"
                                 style="width:50px;height:50px;">
                                 <i class="fa-solid fa-bell" style="font-size:18px;color:#6c757d"></i>
                             </span>
-                            @if(!empty($dueCount) && $dueCount > 0)
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:.65rem;">{{ $dueCount }}</span>
+                            @if (!empty($dueCount) && $dueCount > 0)
+                                <span
+                                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                    style="font-size:.65rem;">{{ $dueCount }}</span>
                             @endif
                         </button>
 
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notifMenu" style="width:320px;">
                             <li class="dropdown-header fw-bold">Notifications</li>
-                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
 
-                            @if(empty($dueCount) || $dueCount === 0)
+                            @if (empty($dueCount) || $dueCount === 0)
                                 <li class="text-center text-muted small py-2">No notifications</li>
                             @else
-                                @foreach($dueSoonBills as $nb)
+                                @foreach ($dueSoonBills as $nb)
                                     <li>
-                                        <a class="dropdown-item d-flex justify-content-between align-items-start" href="{{ route('bills.index') }}">
+                                        <a class="dropdown-item d-flex justify-content-between align-items-start"
+                                            href="{{ route('bills.index') }}">
                                             <div class="me-2">
                                                 <div class="fw-semibold">{{ $nb->bill_name }}</div>
-                                                <div class="small text-muted">Due {{ \Carbon\Carbon::parse($nb->due_date)->diffForHumans() }}</div>
+                                                <div class="small text-muted">Due
+                                                    {{ \Carbon\Carbon::parse($nb->due_date)->diffForHumans() }}</div>
                                             </div>
                                             <div class="text-end">
-                                                <div class="fw-semibold">₱{{ number_format($nb->amount,2) }}</div>
+                                                <div class="fw-semibold">₱{{ number_format($nb->amount, 2) }}</div>
                                             </div>
                                         </a>
                                     </li>
                                 @endforeach
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-center small" href="{{ route('bills.index') }}">View all bills</a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item text-center small" href="{{ route('bills.index') }}">View all
+                                        bills</a></li>
                             @endif
                         </ul>
                     </div>
                     <div class="dropdown">
                         @php
                             $userEmail = auth()->user()->email ?? null;
+                            $profilePhoto = auth()->user()->profile_photo ?? null;
                         @endphp
 
                         <button class="btn p-0 border-0 bg-transparent d-flex align-items-center" id="userMenu"
                             data-bs-toggle="dropdown" aria-expanded="false">
 
-                            <span
-                                class="rounded-circle bg-light border d-inline-flex align-items-center justify-content-center me-2"
-                                style="width:50px;height:50px;">
-                                <i class="fa-solid fa-user" style="font-size:18px;color:#6c757d"></i>
-                            </span>
+                            @if ($profilePhoto && Storage::disk('public')->exists($profilePhoto))
+                                <img src="{{ asset('storage/' . $profilePhoto) }}" alt="Profile"
+                                    class="rounded-circle border me-2" style="width:50px;height:50px;object-fit:cover;">
+                            @else
+                                <span
+                                    class="rounded-circle bg-light border d-inline-flex align-items-center justify-content-center me-2"
+                                    style="width:50px;height:50px;">
+                                    <i class="fa-solid fa-user" style="font-size:18px;color:#6c757d"></i>
+                                </span>
+                            @endif
 
                         </button>
 
@@ -92,58 +107,62 @@
             <div class="row">
                 <div class="col-lg-3 col-6 mb-3 d-flex flex-column">
                     <!-- Allowance Overview -->
-                    <div class="card border mb-3" style="cursor: pointer;" onclick="openAllowanceModal(event)"
-                        data-allowance="{{ number_format($AllowanceData, 2) }}"
-                        data-last-allowance="{{ number_format($LastAllowanceData, 2) }}"
-                        data-income="{{ number_format($IncomeData, 2) }}"
-                        data-last-income="{{ number_format($LastIncomeData, 2) }}"
-                        data-all="{{ number_format($AllData ?? $AllowanceData + $IncomeData, 2) }}"
-                        data-last-all="{{ number_format($LastAllData ?? $LastAllowanceData + $LastIncomeData, 2) }}">
-                        <div class="card-body kpi-allowance">
+                    <div class="card border mb-3 allowance-card" style="cursor: pointer;">
+                        <div class="card-body kpi-allowance" data-allowance="{{ number_format($AllowanceData, 2) }}"
+                            data-last-allowance="{{ number_format($LastAllowanceData, 2) }}"
+                            data-income="{{ number_format($IncomeData, 2) }}"
+                            data-last-income="{{ number_format($LastIncomeData, 2) }}"
+                            data-all="{{ number_format($AllData ?? $AllowanceData + $IncomeData, 2) }}"
+                            data-last-all="{{ number_format($LastAllData ?? $LastAllowanceData + $LastIncomeData, 2) }}">
+
                             <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap">
                                 <div class="d-flex align-items-center gap-2 flex-wrap">
                                     <i class="fas fa-piggy-bank text-muted"></i>
-                                    <div class="dropdown" onclick="event.stopPropagation();">
+
+                                    <!-- Dropdown -->
+                                    <div class="dropdown">
                                         <button
-                                            class="dropdown-toggle border-0 bg-transparent shadow-none 
-                                   mb-0 fw-semibold text-dark p-0"
+                                            class="dropdown-toggle border-0 bg-transparent shadow-none mb-0 fw-semibold text-dark p-0"
                                             type="button" id="kpiDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                            Allowance Overview
+                                            {{ $overviewLabels[$overviewType] }}
                                         </button>
 
                                         <ul class="dropdown-menu" aria-labelledby="kpiDropdown">
                                             <li>
-                                                <a class="dropdown-item active" href="#"
-                                                    onclick="selectKPI(event, 'allowance', this)">
+                                                <a class="dropdown-item {{ $overviewType === 'allowance' ? 'active' : '' }}"
+                                                    href="{{ route('dashboard', array_merge(request()->query(), ['overview_type' => 'allowance'])) }}">
                                                     Allowance Overview
                                                 </a>
                                             </li>
                                             <li>
-                                                <a class="dropdown-item" href="#"
-                                                    onclick="selectKPI(event, 'income', this)">
+                                                <a class="dropdown-item {{ $overviewType === 'income' ? 'active' : '' }}"
+                                                    href="{{ route('dashboard', array_merge(request()->query(), ['overview_type' => 'income'])) }}">
                                                     Income Overview
                                                 </a>
                                             </li>
                                             <li>
-                                                <a class="dropdown-item" href="#"
-                                                    onclick="selectKPI(event, 'all', this)">
+                                                <a class="dropdown-item {{ $overviewType === 'all' ? 'active' : '' }}"
+                                                    href="{{ route('dashboard', array_merge(request()->query(), ['overview_type' => 'all'])) }}">
                                                     All Overview
                                                 </a>
                                             </li>
                                         </ul>
                                     </div>
+                                    <!-- /Dropdown -->
                                 </div>
                             </div>
+
                             <div class="text-center" id="kpi-display">
                                 <h1 class="fw-semibold mb-0 fs-2 fs-md-1">
-                                    ₱{{ number_format($AllowanceData, 2) }}
+                                    ₱{{ number_format($overviewCurrent, 2) }}
                                 </h1>
                                 <p class="text-secondary mt-1 mb-0 small">
-                                    ₱{{ number_format($LastAllowanceData, 2) }} Previous Month
+                                    ₱{{ number_format($overviewPrevious, 2) }} Previous Month
                                 </p>
                             </div>
                         </div>
                     </div>
+
 
                     <style>
                         .kpi-allowance .dropdown-toggle {
@@ -186,64 +205,77 @@
                     {{-- Budgets Carousel --}}
                     <div class="card border no-hover">
                         <div class="card-body py-2">
-                            <div class="d-flex gap-2 mb-1 align-items-center">
-                                <i class="fas fa-wallet text-muted"></i>
-                                <h6 class="mb-0 fw-semibold text-dark">Budgets</h6>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="d-flex gap-2 align-items-center">
+                                    <i class="fas fa-wallet text-muted"></i>
+                                    <h6 class="mb-0 fw-semibold text-dark">Budgets</h6>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-primary mt-2" data-bs-toggle="modal"
+                                    data-bs-target="#addBUdgetModal">
+                                    <i class="fas fa-plus"></i></button>
                             </div>
                             <div class="text-center">
-                                @if($budgets->isEmpty())
+                                @if ($budgets->isEmpty())
                                     <div class="py-2">
                                         <p class="text-muted mb-0 small">No budgets set</p>
-                                        <a href="{{ route('budgets.index') }}" class="btn btn-sm btn-outline-primary mt-2">
-                                            <i class="fas fa-plus"></i> Add Budget
-                                        </a>
                                     </div>
                                 @else
-                                    <div id="budgetsCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
+                                    <div id="budgetsCarousel" class="carousel slide" data-bs-ride="carousel"
+                                        data-bs-interval="3000">
                                         <div class="carousel-inner">
-                                            @foreach($budgets as $index => $budget)
+                                            @foreach ($budgets as $index => $budget)
                                                 @php
                                                     $spent = $budget->spent ?? 0;
                                                     $amount = $budget->amount ?? 0;
                                                     $percent = $amount > 0 ? round(($spent / $amount) * 100) : 0;
-                                                    $progressColor = $percent >= 100 ? 'danger' : ($percent >= 80 ? 'warning' : 'success');
+                                                    $progressColor =
+                                                        $percent >= 100
+                                                            ? 'danger'
+                                                            : ($percent >= 80
+                                                                ? 'warning'
+                                                                : 'success');
                                                 @endphp
                                                 <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
                                                     <div class="py-1">
                                                         <h6 class="fw-semibold mb-1">{{ $budget->category_name }}</h6>
-                                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                                        <div
+                                                            class="d-flex justify-content-between align-items-center mb-1">
                                                             <div class="text-start">
-                                                                <small class="text-muted d-block" style="font-size: 0.7rem;">Spent</small>
-                                                                <strong class="fs-6">₱{{ number_format($spent, 2) }}</strong>
+                                                                <small class="text-muted d-block"
+                                                                    style="font-size: 0.7rem;">Spent</small>
+                                                                <strong
+                                                                    class="fs-6">₱{{ number_format($spent, 2) }}</strong>
                                                             </div>
                                                             <div class="text-end">
-                                                                <small class="text-muted d-block" style="font-size: 0.7rem;">Limit</small>
-                                                                <strong class="fs-6">₱{{ number_format($amount, 2) }}</strong>
+                                                                <small class="text-muted d-block"
+                                                                    style="font-size: 0.7rem;">Limit</small>
+                                                                <strong
+                                                                    class="fs-6">₱{{ number_format($amount, 2) }}</strong>
                                                             </div>
                                                         </div>
                                                         <div class="progress" style="height: 8px;">
-                                                            <div class="progress-bar bg-{{ $progressColor }}" 
-                                                                 role="progressbar" 
-                                                                 style="width: {{ min($percent, 100) }}%"
-                                                                 aria-valuenow="{{ $percent }}" 
-                                                                 aria-valuemin="0" 
-                                                                 aria-valuemax="100">
+                                                            <div class="progress-bar bg-{{ $progressColor }}"
+                                                                role="progressbar"
+                                                                style="width: {{ min($percent, 100) }}%"
+                                                                aria-valuenow="{{ $percent }}" aria-valuemin="0"
+                                                                aria-valuemax="100">
                                                             </div>
                                                         </div>
-                                                        <small class="text-muted mt-1 d-block" style="font-size: 0.7rem;">{{ $percent }}% used</small>
+                                                        <small class="text-muted mt-1 d-block"
+                                                            style="font-size: 0.7rem;">{{ $percent }}% used</small>
                                                     </div>
                                                 </div>
                                             @endforeach
                                         </div>
-                                        @if($budgets->count() > 1)
-                                            <div class="carousel-indicators position-relative mt-1" style="margin-bottom: 0;">
-                                                @foreach($budgets as $index => $budget)
-                                                    <button type="button" 
-                                                            data-bs-target="#budgetsCarousel" 
-                                                            data-bs-slide-to="{{ $index }}" 
-                                                            class="{{ $index === 0 ? 'active' : '' }}"
-                                                            aria-current="{{ $index === 0 ? 'true' : 'false' }}" 
-                                                            aria-label="Budget {{ $index + 1 }}">
+                                        @if ($budgets->count() > 1)
+                                            <div class="carousel-indicators position-relative mt-1"
+                                                style="margin-bottom: 0;">
+                                                @foreach ($budgets as $index => $budget)
+                                                    <button type="button" data-bs-target="#budgetsCarousel"
+                                                        data-bs-slide-to="{{ $index }}"
+                                                        class="{{ $index === 0 ? 'active' : '' }}"
+                                                        aria-current="{{ $index === 0 ? 'true' : 'false' }}"
+                                                        aria-label="Budget {{ $index + 1 }}">
                                                     </button>
                                                 @endforeach
                                             </div>
@@ -254,6 +286,46 @@
                         </div>
                     </div>
 
+                    <!-- Add Budget Modal -->
+                    <div class="modal fade" id="addBUdgetModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-md">
+                            <div class="modal-content">
+                                <form action="{{ route('budgets.store') }}" method="POST">
+                                    @csrf
+                                    <div class="modal-header bg-success text-white">
+                                        <h5 class="modal-title">Add Budget</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">Category</label>
+                                            <select name="category_id" class="form-select" required>
+                                                @foreach (\App\Models\Categories::where('user_id', auth()->id() ?? 1)->orderBy('name')->get() as $c)
+                                                    <option value="{{ $c->id }}">{{ $c->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Amount</label>
+                                            <input name="amount" type="number" step="0.01" class="form-control"
+                                                required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Note</label>
+                                            <input name="note" type="text" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-primary">Save</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Burn Rate -->
                     <div class="card border shadow-sm">
                         <div class="card-body">
                             <div class="d-flex gap-2 align-items-center mb-1">
@@ -303,8 +375,6 @@
                                         }, 3000);
                                     </script>
                                 @endif
-
-                                <script src="{{ asset('js/allowance-income.js') }}"></script>
 
                                 {{-- Add Allowance / Income Form --}}
                                 <form action="{{ route('allowance.addallowance') }}" method="POST">
@@ -504,11 +574,13 @@
                                                 method="POST">
                                                 @csrf
 
-                                                <div class="mb-2">
-                                                    <label class="form-label small text-muted">Category</label>
+                                                <div class="mb-3">
+                                                    <label class="form-label small fw-semibold text-dark d-block mb-2">
+                                                        <i class="fas fa-tag text-primary"></i> Category
+                                                    </label>
                                                     <!-- User can type a new category or select existing -->
-                                                    <input list="categories" name="category_name" class="form-control"
-                                                        placeholder="Select or type a category" required>
+                                                    <input list="categories" name="category_name" class="form-control form-control-lg border-2"
+                                                        placeholder="Select or type a category" required style="border-color: #e9ecef;">
                                                     <datalist id="categories">
                                                         @foreach ($categories as $category)
                                                             <option value="{{ $category->name }}">
@@ -516,19 +588,43 @@
                                                     </datalist>
                                                 </div>
 
-                                                <div class="mb-2">
-                                                    <label class="form-label small text-muted">Amount</label>
-                                                    <input type="number" name="amount" class="form-control"
-                                                        step="0.01" min="0" required>
+                                                <div class="row">
+                                                    <div class="col-md-6 mb-3">
+                                                        <label class="form-label small fw-semibold text-dark d-block mb-2">
+                                                            Amount
+                                                        </label>
+                                                        <input type="number" name="amount" class="form-control form-control-lg border-2"
+                                                            step="0.01" min="0" required placeholder="0.00" style="border-color: #e9ecef;">
+                                                    </div>
+
+                                                    <div class="col-md-6 mb-3">
+                                                        <label class="form-label small fw-semibold text-dark d-block mb-2">
+                                                          Deduct From
+                                                        </label>
+                                                        <div class="btn-group w-100" role="group" id="deductFromGroup">
+                                                            <input type="radio" class="btn-check" name="deduction_source" id="deductAllowance" value="allowance" required>
+                                                            <label class="btn btn-outline-info btn-sm" for="deductAllowance">
+                                                                <i class="fas fa-piggy-bank me-1"></i> Allowance
+                                                            </label>
+
+                                                            <input type="radio" class="btn-check" name="deduction_source" id="deductIncome" value="income">
+                                                            <label class="btn btn-outline-info btn-sm" for="deductIncome">
+                                                                <i class="fas fa-briefcase me-1"></i> Income
+                                                            </label>
+                                                        </div>
+                                                    </div>
                                                 </div>
 
-                                                <div class="mb-2">
-                                                    <label class="form-label small text-muted">Note</label>
-                                                    <input type="text" name="note" class="form-control" required>
+                                                <div class="mb-3">
+                                                    <label class="form-label small fw-semibold text-dark d-block mb-2">
+                                                        <i class="fas fa-sticky-note text-secondary"></i> Note
+                                                    </label>
+                                                    <textarea name="note" class="form-control form-control-lg border-2" rows="2" 
+                                                        placeholder="Add a note..." required style="border-color: #e9ecef;"></textarea>
                                                 </div>
 
-                                                <button type="submit" class="btn btn-success w-100 mt-2">
-                                                    Add Expense
+                                                <button type="submit" class="btn btn-success w-100 mt-3 py-2 fw-semibold">
+                                                    <i class="fas fa-plus-circle me-2"></i> Add Expense
                                                 </button>
                                             </form>
 
@@ -611,8 +707,7 @@
                     };
                 </script>
 
-                <script src="{{ asset('js/daily-expenses.js') }}"></script>
-                <script src="{{ asset('js/recent-transactions.js') }}"></script>
+                {{-- JS disabled: daily-expenses.js and recent-transactions.js removed --}}
 
                 <div class="col-lg-6 d-flex flex-column">
                     <!-- Chart Card -->
@@ -749,8 +844,10 @@
                                                 <label class="form-label small">Recurrence</label>
                                                 <select name="recurrence_type_id" class="form-select">
                                                     <option value="">-- none --</option>
-                                                    @foreach($recurrenceTypes as $rt)
-                                                        <option value="{{ $rt->id }}" {{ (string)old('recurrence_type_id') === (string)$rt->id ? 'selected' : '' }}>{{ ucfirst($rt->name) }}</option>
+                                                    @foreach ($recurrenceTypes as $rt)
+                                                        <option value="{{ $rt->id }}"
+                                                            {{ (string) old('recurrence_type_id') === (string) $rt->id ? 'selected' : '' }}>
+                                                            {{ ucfirst($rt->name) }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -914,7 +1011,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
-                <form action="{{ route('profile.update') }}" method="POST">
+                <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
                     <div class="modal-body">
@@ -940,7 +1037,7 @@
                                             </div>
                                             <div class="col-md-4">
                                                 <label class="form-label small">Profile photo</label>
-                                                <input type="file" name="avatar" id="profileAvatarInput"
+                                                <input type="file" name="profile_photo" id="profileAvatarInput"
                                                     accept="image/*" class="form-control form-control-sm">
                                                 <small class="text-muted">Optional. JPG/PNG, max 2MB.</small>
                                             </div>
@@ -1095,5 +1192,7 @@
             });
         </script>
     @endif
+
+    <script></script>
 
 @endsection

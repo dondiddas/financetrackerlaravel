@@ -104,6 +104,7 @@ public function getDailyExpenseBreakdown($userId)
         'category_name' => 'required|string|max:255',
         'amount' => 'required|numeric|min:0',
         'note' => 'required|string|max:255',
+        'deduction_source' => 'required|in:allowance,income',
     ]);
 
        $category = Categories::firstOrCreate(
@@ -117,6 +118,7 @@ public function getDailyExpenseBreakdown($userId)
         'amount' => $request->amount,
         'note' => $request->note,
         'user_id' => auth()->id(),
+        'deduction_source' => $request->deduction_source,
     ]);
 
     if ($request->ajax() || $request->wantsJson()) {
@@ -131,6 +133,7 @@ public function getDailyExpenseBreakdown($userId)
                 'note' => $request->note,
                 'category_name' => $category->name,
                 'transaction_date' => now()->format('F j, Y'),
+                'deduction_source' => $request->deduction_source,
             ],
             'totals' => [
                 'daily' => $dailyTotal,

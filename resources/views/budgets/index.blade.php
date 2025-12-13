@@ -22,19 +22,12 @@
                     <a href="{{ route('budgets.index', array_merge(request()->query(), ['show' => 'trash'])) }}" class="btn btn-sm btn-outline-warning">
                         <i class="fa-solid fa-trash"></i> 
                     </a>
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addBudgetModal"><i class="fa-solid fa-plus"></i></button>
                 @endif
-                <button class="btn btn-sm btn-primary" id="addBudgetBtn"><i class="fa-solid fa-plus"></i> </button>
             </div>
         </header>
-        {{-- Flash messages --}}
-        @if (session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
-        @if (session('error'))
-            <div class="alert alert-danger">{{ session('error') }}</div>
-        @endif
 
-        {{-- alerts --}}
+        {{-- Budget-specific alerts (over/near limit) --}}
         <section id="budgetAlerts" class="mb-3">
             @php
                 $near = [];
@@ -54,25 +47,49 @@
             @endphp
 
                 @if (count($over) > 0)
-                <div class="alert alert-danger shadow-sm d-flex align-items-start gap-2" role="alert">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                    <div>
-                        <strong>{{ count($over) }} category(ies) over limit</strong>
-                        <div class="small">You exceeded the budget for
-                            {{ implode(', ', array_map(fn($x) => $x->category_name, $over)) }}.</div>
+                <div class="modal fade" id="overLimitModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-0 shadow-lg">
+                            <div class="modal-body text-center py-4">
+                                <div class="text-danger mb-3">
+                                    <i class="fa-solid fa-triangle-exclamation" style="font-size: 3rem;"></i>
+                                </div>
+                                <h5>{{ count($over) }} category(ies) over limit</h5>
+                                <p class="mb-0 text-muted">You exceeded the budget for {{ implode(', ', array_map(fn($x) => $x->category_name, $over)) }}.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const modal = new bootstrap.Modal(document.getElementById('overLimitModal'));
+                        modal.show();
+                        setTimeout(() => modal.hide(), 3000);
+                    });
+                </script>
             @endif
 
                 @if (count($near) > 0)
-                <div class="alert alert-warning shadow-sm d-flex align-items-start gap-2" role="alert">
-                    <i class="fa-solid fa-circle-exclamation"></i>
-                    <div>
-                        <strong>{{ count($near) }} category(ies) near limit</strong>
-                        <div class="small">Approaching limit for
-                            {{ implode(', ', array_map(fn($x) => $x->category_name, $near)) }}.</div>
+                <div class="modal fade" id="nearLimitModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-0 shadow-lg">
+                            <div class="modal-body text-center py-4">
+                                <div class="text-warning mb-3">
+                                    <i class="fa-solid fa-circle-exclamation" style="font-size: 3rem;"></i>
+                                </div>
+                                <h5>{{ count($near) }} category(ies) near limit</h5>
+                                <p class="mb-0 text-muted">Approaching limit for {{ implode(', ', array_map(fn($x) => $x->category_name, $near)) }}.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const modal = new bootstrap.Modal(document.getElementById('nearLimitModal'));
+                        modal.show();
+                        setTimeout(() => modal.hide(), 3000);
+                    });
+                </script>
             @endif
         </section>
 
@@ -159,7 +176,7 @@
 
                                 <div class="mb-2">
                                     <div class="progress" style="height:12px">
-                                        <div class="progress-bar progress-fill" role="progressbar" style="width:0%"
+                                        <div class="progress-bar progress-fill" role="progressbar" style="width:{{ $percent }}%"
                                             aria-valuemin="0" aria-valuemax="100"></div>
                                     </div>
                                 </div>
@@ -174,11 +191,10 @@
 
                             <div class="d-flex gap-2 align-items-start mt-3 mt-md-0">
                                 @if(!$showTrashed)
-                                    <button class="btn btn-sm btn-outline-secondary editBudgetBtn" data-bs-toggle="modal"
-                                        data-bs-target="#editBudgetModal" data-id="{{ $b->id }}"
-                                        data-amount="{{ $amount }}" data-spent="{{ $spent }}"
-                                        data-note="{{ $b->note ?? '' }}" data-category="{{ $b->category_id ?? '' }}"
-                                        title="Edit"><i class="fa-solid fa-pen"></i></button>
+                                    <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" 
+                                        data-bs-target="#editBudgetModal{{ $b->id }}" title="Edit">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
 
                                     <form action="{{ route('budgets.destroy', $b->id) }}" method="POST"
                                           onsubmit="return confirm('Delete this budget?');">
@@ -205,78 +221,80 @@
                 </div>
             </div>
             <div class="card-footer d-flex justify-content-end">
-                <small class="text-muted">Tip: Tap a category to edit on mobile.</small>
+                <small class="text-muted">Click the edit icon to modify a budget.</small>
             </div>
         </section>
+
+        <!-- Edit Budget Modals (one per budget) -->
+        @foreach($budgets as $b)
+            @php
+                $spent = $b->spent ?? 0;
+                $amount = $b->amount ?? 0;
+            @endphp
+            <div class="modal fade" id="editBudgetModal{{ $b->id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-md">
+                    <div class="modal-content">
+                        <form action="{{ route('budgets.update', $b->id) }}" method="POST">
+                            @csrf
+                            @method('PUT')
+                            <div class="modal-header bg-success text-white">
+                                <h5 class="modal-title">Edit Budget</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Category</label>
+                                    <select name="category_id" class="form-select" required>
+                                        @foreach (\App\Models\Categories::where('user_id', auth()->id() ?? 1)->orderBy('name')->get() as $c)
+                                            <option value="{{ $c->id }}" {{ ($b->category_id ?? null) == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Amount</label>
+                                    <input name="amount" type="number" step="0.01" value="{{ $amount }}" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Note</label>
+                                    <input name="note" type="text" value="{{ $b->note ?? '' }}" class="form-control">
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        @endforeach
 
         <!-- Add Budget Modal -->
         <div class="modal fade" id="addBudgetModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-md">
-
                 <div class="modal-content">
-                    <form id="addBudgetForm" action="{{ route('budgets.store') }}" method="POST">
+                    <form action="{{ route('budgets.store') }}" method="POST">
                         @csrf
-                        <div class="modal-header bg-success text-white ">
+                        <div class="modal-header bg-success text-white">
                             <h5 class="modal-title">Add Budget</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
-                            <div class="mb-2">
+                            <div class="mb-3">
                                 <label class="form-label">Category</label>
-                                <select id="budgetCategory" name="category_id" class="form-select" required>
+                                <select name="category_id" class="form-select" required>
                                     @foreach (\App\Models\Categories::where('user_id', auth()->id() ?? 1)->orderBy('name')->get() as $c)
                                         <option value="{{ $c->id }}">{{ $c->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="mb-2">
+                            <div class="mb-3">
                                 <label class="form-label">Amount</label>
                                 <input name="amount" type="number" step="0.01" class="form-control" required>
                             </div>
-                            <div class="mb-2">
+                            <div class="mb-3">
                                 <label class="form-label">Note</label>
                                 <input name="note" type="text" class="form-control">
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Save</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- Edit Budget Modal -->
-        <div class="modal fade" id="editBudgetModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-md">
-
-                <div class="modal-content">
-                    <form id="editBudgetForm" action="#" method="POST">
-                        @csrf
-                        @method('PUT')
-                        <div class="modal-header bg-success text-white">
-                            <h5 class="modal-title">Edit Budget</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <input type="hidden" name="id" id="editBudgetId">
-                            <div class="mb-2">
-                                <label class="form-label">Category</label>
-                                <select id="editBudgetCategory" name="category_id" class="form-select" required>
-                                    @foreach (\App\Models\Categories::where('user_id', auth()->id() ?? 1)->orderBy('name')->get() as $c)
-                                        <option value="{{ $c->id }}">{{ $c->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="mb-2">
-                                <label class="form-label">Amount</label>
-                                <input id="editAmount" name="amount" type="number" step="0.01"
-                                    class="form-control" required>
-                            </div>
-                            <div class="mb-2">
-                                <label class="form-label">Note</label>
-                                <input id="editNote" name="note" type="text" class="form-control">
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -326,5 +344,5 @@
 
     </div>
 
-    <script src="{{ asset('js/budgets.js') }}"></script>
+    {{-- JS disabled: budgets.js removed --}}
 @endsection

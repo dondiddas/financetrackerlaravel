@@ -73,68 +73,39 @@
 
         <div class="card bills-card p-3 mb-3">
             <div class="bills-toolbar mb-2">
-                <form id="billsFilterForm" method="GET" class="d-flex align-items-center w-100 g-2" style="gap:.5rem;">
-                    <div class="d-flex w-100 align-items-center" style="gap:.5rem;">
+                <form id="billsFilterForm" method="GET" class="d-flex align-items-center w-100 gap-2 flex-wrap">
+                    <div class="d-flex w-100 align-items-center gap-2">
                         <div class="input-group search-input" style="flex:1;">
                         <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
                         <input type="search" name="q" value="{{ old('q', $search ?? '') }}" class="form-control" placeholder="Search bills or description">
                         </div>
-
-                        <a id="filtersToggle" href="#" class="btn btn-outline-secondary d-md-none" title="Show filters">
-                            <i class="fa-solid fa-filter"></i>
-                        </a>
-
+                        <button type="submit" class="btn btn-outline-secondary">Search</button>
                     </div>
 
-                    <div id="filterControls" class="d-flex align-items-center" style="gap:.5rem;">
-                    <select name="status" class="form-select" style="max-width:160px">
+                    <div class="d-flex align-items-center gap-2">
+                    <select name="status" class="form-select" style="max-width:160px" onchange="this.form.submit()">
                         <option value="">All status</option>
                         <option value="overdue" {{ (isset($status) && $status=='overdue') ? 'selected' : '' }}>Overdue</option>
                         <option value="upcoming" {{ (isset($status) && $status=='upcoming') ? 'selected' : '' }}>Upcoming</option>
                         <option value="paid" {{ (isset($status) && $status=='paid') ? 'selected' : '' }}>Paid</option>
                     </select>
 
-                    <select name="recurring" class="form-select" style="max-width:160px">
+                    <select name="recurring" class="form-select" style="max-width:160px" onchange="this.form.submit()">
                         <option value="">All</option>
                         <option value="1" {{ (isset($recurring) && $recurring=='1') ? 'selected' : '' }}>Recurring only</option>
                     </select>
 
-                    <div class="ms-auto d-flex gap-2">
-                        <a href="{{ route('bills.index') }}" class="btn btn-outline">Reset</a>
+                    <div class="d-flex gap-2">
+                        <a href="{{ route('bills.index') }}" class="btn btn-outline-secondary">Reset</a>
                     </div>
 
-                                <div class="d-flex align-items-center gap-2">
-                <a href="#addBillModal" data-bs-toggle="modal" class="btn btn-primary">
-                    <i class="fa-solid fa-plus me-1"></i> 
-                </a>
-            </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="#addBillModal" data-bs-toggle="modal" class="btn btn-primary">
+                            <i class="fa-solid fa-plus me-1"></i> 
+                        </a>
+                    </div>
                     </div>
                 </form>
-
-                <script>
-                    (function(){
-                        const form = document.getElementById('billsFilterForm');
-                        if (!form) return;
-
-                        const selects = form.querySelectorAll('select[name="status"], select[name="recurring"]');
-                        selects.forEach(s => s.addEventListener('change', () => form.submit()));
-
-                        const search = form.querySelector('input[type="search"][name="q"]');
-                        if (search) {
-                            let timeout = null;
-                            search.addEventListener('input', function() {
-                                if (timeout) clearTimeout(timeout);
-                                timeout = setTimeout(() => form.submit(), 500);
-                            });
-                            search.addEventListener('keydown', function(e) {
-                                if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    form.submit();
-                                }
-                            });
-                        }
-                    })();
-                </script>
             </div>
 
             <div class="table-responsive">
