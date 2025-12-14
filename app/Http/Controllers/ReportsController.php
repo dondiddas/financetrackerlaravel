@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -13,7 +14,7 @@ class ReportsController extends Controller
      */
     public function index(Request $request)
     {
-        $userId = auth()->id();
+        $userId = Auth::id();
 
         // Date range (optional)
         $from = $request->input('from');
@@ -71,7 +72,7 @@ class ReportsController extends Controller
      */
     public function exportCsv(Request $request)
     {
-        $userId = auth()->id();
+        $userId = Auth::id();
         $from = $request->input('from');
         $to = $request->input('to');
         $type = $request->input('type');

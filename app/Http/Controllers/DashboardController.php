@@ -11,6 +11,7 @@ use App\Http\Controllers\AllowanceController;
 use App\Http\Controllers\ExpensesController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB; 
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -33,7 +34,7 @@ class DashboardController extends Controller
 
     public function dashboard(Request $request)
     {
-        $id = auth()->id();
+        $id = Auth::id();
 
         // --- Get User Name ---
         $user = User::find($id);

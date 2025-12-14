@@ -44,14 +44,17 @@
 <script>
 let lastScroll = 0;
 const mobileNav = document.getElementById("mobileNav");
+const mobileFAB = document.getElementById("mobileFAB");
 
 window.addEventListener("scroll", function () {
     let currentScroll = window.scrollY;
 
     if (currentScroll > lastScroll) {
         mobileNav.style.transform = "translateY(100%)";
+        if (mobileFAB) mobileFAB.style.transform = "translateY(150%)";
     } else {
         mobileNav.style.transform = "translateY(0)";
+        if (mobileFAB) mobileFAB.style.transform = "translateY(0)";
     }
 
     lastScroll = currentScroll;

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Categories;
 use App\Models\Transaction;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class AllowanceController extends Controller
@@ -78,15 +79,14 @@ public function getLastMonthIncome($userid)
         'note' => 'nullable|string|max:255',
     ]);
 
-    // Find or create the corresponding category (income or allowance)
     $category = Categories::firstOrCreate([
         'name' => ucfirst($request->type), 
         'type' => $request->type,
-        'user_id' => auth()->id(),
+        'user_id' => Auth::id(),
     ]);
 
     Transaction::create([
-        'user_id' => auth()->id(),
+        'user_id' => Auth::id(),
         'category_id' => $category->id,
         'amount' => $request->amount,
         'note' => $request->note ?? "Added {$request->type}",

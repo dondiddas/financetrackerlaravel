@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 use App\Models\Bills;
+use App\Models\Categories;
+use App\Models\Transaction;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class UpcomingBillsController extends Controller
@@ -12,6 +16,7 @@ class UpcomingBillsController extends Controller
         $getUpcomingBills = Bills::with('recurrenceType')
             ->select('id','bill_name', 'amount', 'due_date','description','is_recurring','recurrence_type_id')
             ->where('user_id', $userid)
+            ->where('is_paid', false)
             ->whereDate('due_date', '>=', now())
             ->orderBy('due_date', 'asc')
             ->get();
@@ -32,7 +37,7 @@ class UpcomingBillsController extends Controller
         'id' => $bill->id,
         'bill_name' => $bill->bill_name,
         'amount' => $bill->amount,
-        'due_date' => $bill->due_date ? $bill->due_date->toDateString() : null,
+        'due_date' => $bill->due_date ? Carbon::parse($bill->due_date)->toDateString() : null,
         'is_paid' => (bool) $bill->is_paid,
         'description' => $bill->description,
         'is_recurring' => (bool) $bill->is_recurring,
@@ -62,7 +67,7 @@ public function store(Request $request)
         ]);
 
         Bills::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'bill_name' => $request->bill_name,
             'amount' => $request->amount,
             'due_date' => $request->due_date,
@@ -77,7 +82,7 @@ public function store(Request $request)
     // Show all bills (upcoming + overdue)
     public function index(Request $request)
     {
-        $userId = auth()->id();
+        $userId = Auth::id();
 
         $query = Bills::where('user_id', $userId);
 
@@ -124,14 +129,42 @@ public function store(Request $request)
     public function markPaid(Request $request, $id)
     {
         $bill = Bills::findOrFail($id);
+        
+        // Validate deduction source
+        $deductionSource = $request->input('deduction_source');
+        if (!in_array($deductionSource, ['income', 'allowance'])) {
+            return redirect()->back()->with('error', 'Invalid deduction source selected.');
+        }
+
         $bill->is_paid = true;
         $bill->save();
+
+        // Ensure there is a category to attach this bill payment to (e.g., "Bills")
+        $billsCategory = Categories::firstOrCreate(
+            [
+                'user_id' => Auth::id(),
+                'name' => 'Bills',
+            ],
+            [
+                'type' => 'expense',
+            ]
+        );
+
+        // Create a transaction record for the bill payment
+        Transaction::create([
+            'user_id' => Auth::id(),
+            'amount' => $bill->amount,
+            'note' => 'Bill Payment: ' . $bill->bill_name,
+            'transaction_date' => now()->toDateString(),
+            'category_id' => $billsCategory->id,
+            'deduction_source' => $deductionSource,
+        ]);
 
         // If recurring, create the next occurrence based on recurrence type
         if ($bill->is_recurring && $bill->recurrence_type_id) {
             $nextDue = null;
             try {
-                $dt = \Carbon\Carbon::parse($bill->due_date);
+                $dt = Carbon::parse($bill->due_date);
                 $type = $bill->recurrenceType->name ?? null;
                 if ($type === 'monthly') {
                     $nextDue = $dt->addMonth()->toDateString();
@@ -159,7 +192,7 @@ public function store(Request $request)
             }
         }
 
-        return redirect()->back()->with('success', 'Bill marked as paid.');
+        return redirect()->back()->with('success', 'Bill marked as paid and transaction recorded.');
     }
 
     /**

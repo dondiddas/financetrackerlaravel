@@ -66,6 +66,38 @@
     <div class="container py-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
+
+            @if (session('success'))
+                <!-- Success Modal -->
+                <div class="modal fade" id="billSuccessModal" tabindex="-1" aria-labelledby="billSuccessLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-sm">
+                        <div class="modal-content">
+                            <div class="modal-header bg-success text-white">
+                                <h6 class="modal-title d-flex align-items-center mb-0" id="billSuccessLabel">
+                                    <i class="fas fa-check-circle me-2"></i> Success
+                                </h6>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body text-center">
+                                <p class="mb-0">{{ session('success') }}</p>
+                            </div>
+                            <div class="modal-footer justify-content-center">
+                                <button type="button" class="btn btn-success px-4" data-bs-dismiss="modal">OK</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        var modalEl = document.getElementById('billSuccessModal');
+                        if (modalEl) {
+                            var modal = new bootstrap.Modal(modalEl);
+                            modal.show();
+                        }
+                    });
+                </script>
+            @endif
                 <h3 class="mb-0">Bills & Subscriptions</h3>
                 <small class="text-muted">Manage recurring payments, overdue items and reminders</small>
             </div>
@@ -163,13 +195,11 @@
                                     <div class="d-flex justify-content-end gap-2">
                                         <div class="d-flex align-items-center" style="gap:.5rem;">
                                             @if(!$bill->is_paid)
-                                                <form action="{{ route('bills.pay', $bill->id) }}" method="POST" class="d-inline">
-                                                    @csrf
-                                                    <button class="btn btn-sm btn-outline-success">
-                                                        <i class="fa-solid fa-check me-1"></i>
-                                                        Mark Paid
-                                                    </button>
-                                                </form>
+                                                <button type="button" class="btn btn-sm btn-outline-success" 
+                                                    data-bs-toggle="modal" data-bs-target="#deductionSourceModal{{ $bill->id }}">
+                                                    <i class="fa-solid fa-check me-1"></i>
+                                                    Mark Paid
+                                                </button>
                                             @endif
 
                                             <button type="button" class="btn btn-sm btn-outline-secondary edit-bill-btn" data-id="{{ $bill->id }}">
@@ -199,12 +229,40 @@
                 <div id="billsSummary" class="text-muted">
                     Showing {{ $bills->firstItem() ?? 0 }} - {{ $bills->lastItem() ?? 0 }} of {{ $bills->total() }} bills
                 </div>
-                <div id="billsPagination">{{ $bills->links() }}</div>
-                
+                <div id="billsPagination">{{ $bills->links('pagination::bootstrap-5') }}</div>
             </div>
         </div>
-
     </div>
+    <!-- Deduction Source Modals -->
+            @foreach($bills as $bill)
+                <div class="modal fade" id="deductionSourceModal{{ $bill->id }}" tabindex="-1"
+                    aria-labelledby="deductionSourceLabel{{ $bill->id }}" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title fw-semibold" id="deductionSourceLabel{{ $bill->id }}">
+                                    Deduct from where?
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="text-muted mb-3">Select where to deduct the bill amount of <strong>₱{{ number_format($bill->amount, 2) }}</strong></p>
+                                <form action="{{ route('bills.pay', $bill->id) }}" method="POST" class="deduction-form">
+                                    @csrf
+                                    <div class="d-grid gap-2">
+                                        <button type="submit" name="deduction_source" value="income" class="btn btn-outline-primary fw-semibold">
+                                            <i class="fas fa-wallet me-2"></i> From Income
+                                        </button>
+                                        <button type="submit" name="deduction_source" value="allowance" class="btn btn-outline-success fw-semibold">
+                                            <i class="fas fa-hand-holding-usd me-2"></i> From Allowance
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
 
 
 <div class="modal fade" id="addBillModal" tabindex="-1" aria-labelledby="addBillModalLabel" aria-hidden="true">

@@ -5,7 +5,7 @@ use Carbon\Carbon;
 use App\Models\Transaction;
 use App\Models\Categories;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class ExpensesController extends Controller
 {
@@ -48,7 +48,7 @@ public function getDailyExpenseBreakdown($userId)
      */
     public function index(Request $request)
     {
-        $userId = auth()->id();
+        $userId = Auth::id();
 
         $showTrashed = $request->input('show') === 'trash';
 
@@ -108,7 +108,7 @@ public function getDailyExpenseBreakdown($userId)
     ]);
 
        $category = Categories::firstOrCreate(
-        ['name' => $request->category_name, 'user_id' => auth()->id()],
+        ['name' => $request->category_name, 'user_id' => Auth::id()],
         ['type' => 'expense'] 
     );
 
@@ -117,12 +117,12 @@ public function getDailyExpenseBreakdown($userId)
         'category_id' => $category->id,
         'amount' => $request->amount,
         'note' => $request->note,
-        'user_id' => auth()->id(),
+        'user_id' => Auth::id(),
         'deduction_source' => $request->deduction_source,
     ]);
 
     if ($request->ajax() || $request->wantsJson()) {
-        $userId = auth()->id();
+        $userId = Auth::id();
         $dailyTotal = $this->getDailyExpenses($userId);
 
         return response()->json([
@@ -285,7 +285,7 @@ public function getBurnRate($userId)
      */
     public function destroy($id)
     {
-        $userId = auth()->id();
+        $userId = Auth::id();
 
         $transaction = Transaction::where('id', $id)
             ->where('user_id', $userId)
@@ -305,7 +305,7 @@ public function getBurnRate($userId)
      */
     public function restore($id)
     {
-        $userId = auth()->id();
+        $userId = Auth::id();
 
         $transaction = Transaction::onlyTrashed()
             ->where('id', $id)

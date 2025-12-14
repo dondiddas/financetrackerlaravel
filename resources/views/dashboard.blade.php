@@ -352,7 +352,7 @@
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
 
-                            <div class="modal-header">
+                            <div class="modal-header  bg-success text-white">
                                 <h5 class="modal-title fw-semibold">Add Income or Allowance</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
@@ -462,7 +462,7 @@
                         aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content border-0 shadow-lg">
-                                <div class="modal-header">
+                                <div class="modal-header  bg-success text-white">
                                     <h5 class="modal-title fw-semibold" id="dailyLimitLabel">
                                         Add Daily Expense Limit
                                     </h5>
@@ -749,7 +749,7 @@
                                         </div>
 
                                         <!-- Add New Bill Button -->
-                                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                                        <button class="btn btn-sm btn-outline-primary mt-2" data-bs-toggle="modal"
                                             data-bs-target="#addBillModal">
                                             <i class="fas fa-plus"></i>
                                         </button>
@@ -760,6 +760,7 @@
                                             @forelse ($upcomingbillsData as $bill)
                                                 <li class="d-flex justify-content-between align-items-center border-bottom py-2 px-2 clickable"
                                                     data-bs-toggle="modal" data-bs-target="#billModal{{ $bill->id }}"
+                                                    data-bill-id="{{ $bill->id }}"
                                                     style="cursor: pointer;">
                                                     <div class="text-start flex-grow-1">
                                                         <div class="fw-semibold">{{ $bill->bill_name }} @if (!empty($bill->is_recurring))
@@ -791,7 +792,7 @@
                             <div class="modal-dialog modal-dialog-centered">
                                 <div class="modal-content">
 
-                                    <div class="modal-header">
+                                    <div class="modal-header  bg-success text-white">
                                         <h5 class="modal-title fw-semibold" id="addBillModalLabel">Add New Bill</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                                             aria-label="Close"></button>
@@ -910,13 +911,40 @@
 
                                         <div class="modal-footer">
                                             <div class="d-flex gap-2 justify-content-end">
-                                                <form {{-- action="{{ route('', $bill->id) }}" --}} method="POST">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-success fw-semibold">
-                                                        Mark as Paid
-                                                    </button>
-                                                </form>
+                                                <button type="button" class="btn btn-success fw-semibold" 
+                                                    data-bs-toggle="modal" data-bs-target="#deductionSourceModal{{ $bill->id }}">
+                                                    Mark as Paid
+                                                </button>
                                             </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Deduction Source Modal -->
+                            <div class="modal fade" id="deductionSourceModal{{ $bill->id }}" tabindex="-1"
+                                aria-labelledby="deductionSourceLabel{{ $bill->id }}" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title fw-semibold" id="deductionSourceLabel{{ $bill->id }}">
+                                                Deduct from where?
+                                            </h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p class="text-muted mb-3">Select where to deduct the bill amount of <strong>₱{{ number_format($bill->amount, 2) }}</strong></p>
+                                            <form action="{{ route('bills.pay', $bill->id) }}" method="POST" class="deduction-form">
+                                                @csrf
+                                                <div class="d-grid gap-2">
+                                                    <button type="submit" name="deduction_source" value="income" class="btn btn-outline-primary fw-semibold">
+                                                        <i class="fas fa-wallet me-2"></i> From Income
+                                                    </button>
+                                                    <button type="submit" name="deduction_source" value="allowance" class="btn btn-outline-success fw-semibold">
+                                                        <i class="fas fa-hand-holding-usd me-2"></i> From Allowance
+                                                    </button>
+                                                </div>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
@@ -1193,6 +1221,36 @@
         </script>
     @endif
 
-    <script></script>
+    @if (session('success'))
+        <!-- Success Modal -->
+        <div class="modal fade" id="billSuccessModal" tabindex="-1" aria-labelledby="billSuccessLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h6 class="modal-title d-flex align-items-center mb-0" id="billSuccessLabel">
+                            <i class="fas fa-check-circle me-2"></i> Success
+                        </h6>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <p class="mb-0">{{ session('success') }}</p>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-success px-4" data-bs-dismiss="modal">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var modalEl = document.getElementById('billSuccessModal');
+                if (modalEl) {
+                    var modal = new bootstrap.Modal(modalEl);
+                    modal.show();
+                }
+            });
+        </script>
+    @endif
 
 @endsection

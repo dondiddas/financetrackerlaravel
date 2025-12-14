@@ -5,7 +5,7 @@ use Carbon\CarbonInterface;
 use App\Models\DailyLimit;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Auth;
 class DailyLimitController extends Controller
 {
     /**
@@ -28,7 +28,7 @@ class DailyLimitController extends Controller
             'amount' => 'required|numeric|min:0',
         ]);
 
-        $userId = auth()->id();
+        $userId = Auth::id();
         $today = now()->setTimezone('Asia/Manila')->toDateString();
 
         // Update or create a daily limit record
